@@ -1,0 +1,4 @@
+# This file ensures the weights directory is tracked by git
+# Download model weights and place them in this directory:
+# - bst_model.pt (BST stroke classification model)
+# - tracknet_model.pt (TrackNetV3 shuttlecock tracking model)

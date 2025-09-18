@@ -1,0 +1,103 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model weights and data
+weights/*.pt
+weights/*.pth
+weights/*.ckpt
+*.pt
+*.pth
+*.ckpt
+
+# Temporary files
+temp/
+tmp/
+temp_*/
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+wandb/
+
+# Dataset and videos
+data/
+datasets/
+videos/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Results and outputs
+results/
+outputs/
+predictions/
+*.csv
+*.json
+*.pkl
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Cache
+.cache/
+*.cache
+
+# MMPose cache
+.mmcache/
+
+# Gradio
+gradio_cached_examples/
+flagged/
+
+# Process specific
+temp_processing/
+bst_result.json
