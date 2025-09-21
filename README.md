@@ -2,7 +2,7 @@
 
 A comprehensive AI system for classifying badminton strokes using computer vision and deep learning. This project combines human pose estimation (MMPose), shuttlecock tracking (TrackNetV3), and stroke classification (BST - Badminton Stroke Transformer) to analyze badminton videos.
 
-## 🎯 Features
+## Features
 
 - **35 Stroke Types**: Classifies 35 different badminton stroke types including smashes, clears, drops, drives, and serves
 - **Real-time Analysis**: Upload videos and get instant stroke classification
@@ -10,7 +10,7 @@ A comprehensive AI system for classifying badminton strokes using computer visio
 - **Web Interface**: Easy-to-use Gradio web interface
 - **High Accuracy**: Achieves 60%+ accuracy on test data with 77%+ top-2 accuracy
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Installation
 
@@ -31,8 +31,8 @@ pip install -r requirements.txt
 
 Download the pre-trained model weights from Google Drive and place them in the `weights/` folder:
 
-- **BST Model** (~7.5 MB): [Download from Google Drive](https://drive.google.com/file/d/YOUR_BST_WEIGHT_ID) → `weights/bst_model.pt`
-- **TrackNetV3 Model** (~45 MB): [Download from Google Drive](https://drive.google.com/file/d/YOUR_TRACKNET_WEIGHT_ID) → `weights/tracknet_model.pt`
+- **BST Model** (~7.5 MB): [Download from Google Drive](https://drive.google.com/drive/folders/1jTlfcXD50FtxcMNjoY_UxEvoInzm8F66) → `weights/bst_model.pt`
+- **TrackNetV3 Model** (~45 MB): [Download from Google Drive](https://drive.google.com/drive/folders/1jTlfcXD50FtxcMNjoY_UxEvoInzm8F66) → `weights/tracknet_model.pt`
 
 **Note**: Replace `YOUR_BST_WEIGHT_ID` and `YOUR_TRACKNET_WEIGHT_ID` with actual Google Drive file IDs.
 
@@ -44,7 +44,7 @@ python app.py
 
 Open http://127.0.0.1:7860 in your browser to access the web interface.
 
-## 📋 Usage
+## Usage
 
 ### Web Interface
 1. Upload a badminton video (0.5-30 seconds, MP4/AVI/MOV/MKV)
@@ -71,7 +71,7 @@ else:
     print(f"Error: {result.error_message}")
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 The system uses a multi-stage pipeline:
 
@@ -98,7 +98,7 @@ The system classifies 35 stroke types:
 - Cross-court net shots, Short/Long serves
 - Defensive returns (lobs/drives)
 
-## 📊 Model Performance
+## Model Performance
 
 - **Accuracy**: 60.1%
 - **Top-2 Accuracy**: 77.5%
@@ -136,7 +136,7 @@ from models.dataset import prepare_npy_collated_loaders
 # See stroke_classification/bst_main.py for full training script
 ```
 
-## 📝 Citation
+## Citation
 
 If you use this project in your research, please cite:
 
@@ -149,22 +149,12 @@ If you use this project in your research, please cite:
 }
 ```
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-1. Check the [Issues](../../issues) page
-2. Create a new issue with detailed description
-3. Contact: your-email@example.com
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [MMPose](https://github.com/open-mmlab/mmpose) for human pose estimation
 - [TrackNetV3](https://github.com/alenzenx/TracknetV3) for shuttlecock tracking
