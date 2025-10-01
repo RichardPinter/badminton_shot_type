@@ -1,0 +1,151 @@
+# ================================================================================
+# UNIFIED BADMINTON ANALYSIS SUITE - DEPENDENCY SPECIFICATIONS
+# ================================================================================
+#
+# This file specifies dependencies for the dual-method badminton analysis system
+# combining BST Transformer stroke classification with LSTM performance grading.
+#
+# SYSTEM OVERVIEW:
+# - BST Transformer: 35 stroke types with shuttlecock tracking (MMPose + TrackNetV3)
+# - LSTM Analysis: Player performance grading with movement analysis (YOLO pose)
+# - Unified Streamlit Interface: Single upload, dual analysis results
+#
+# COMPATIBILITY NOTES:
+# - Tested on: Python 3.8-3.12, CUDA optional
+# - Version conflicts resolved between both systems
+# - Gradio components embedded within Streamlit
+#
+# AUTHORS: Richard Pinter, Sujit Dahal, BST Team
+# VERSION: 1.0.0
+# ================================================================================
+
+# ================================================================================
+# CORE WEB APPLICATION FRAMEWORKS
+# ================================================================================
+
+# Streamlit: Main dashboard interface
+streamlit==1.25.0
+
+# Gradio: BST transformer interface components
+gradio>=3.40.0
+
+# ================================================================================
+# DEEP LEARNING FRAMEWORKS
+# ================================================================================
+
+# PyTorch: Primary deep learning framework for both systems
+torch>=2.0.0
+torchvision>=0.14.0
+torchaudio>=0.13.0
+
+# TensorFlow: For LSTM shot classification model
+tensorflow>=2.12.0
+
+# ================================================================================
+# COMPUTER VISION & POSE ESTIMATION
+# ================================================================================
+
+# OpenCV: Video processing (compatible version for both systems)
+opencv-python>=4.6.0
+
+# MMPose ecosystem for BST transformer
+mmpose>=1.0.0
+mmcv>=2.0.0
+mmdet>=3.0.0
+mmengine>=0.7.0
+
+# Ultralytics: YOLOv8 for LSTM pose estimation
+ultralytics>=8.0.35
+
+# ================================================================================
+# SCIENTIFIC COMPUTING & DATA ANALYSIS
+# ================================================================================
+
+# Core scientific packages
+numpy>=1.20.0
+pandas>=1.3.5
+scipy>=1.9.0
+
+# Machine Learning
+scikit-learn==1.4.2  # CRITICAL: Must match LSTM trained model version
+joblib>=1.0.0
+
+# Deep Learning Utilities
+transformers>=4.20.0
+torcheval>=0.0.6
+
+# ================================================================================
+# VISUALIZATION & PLOTTING
+# ================================================================================
+
+# Interactive plotting for dashboard
+plotly>=5.18.0
+
+# Static plotting
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# ================================================================================
+# IMAGE PROCESSING
+# ================================================================================
+
+# PIL/Pillow: Image handling
+Pillow>=8.4.0
+
+# Additional image processing
+imageio>=2.22.0
+
+# ================================================================================
+# STREAMLIT EXTENSIONS
+# ================================================================================
+
+# Interactive drawing components for court selection
+streamlit-drawable-canvas>=0.9.2
+
+# ================================================================================
+# SPECIALIZED ALGORITHMS
+# ================================================================================
+
+# Dynamic Time Warping for movement pattern matching
+fastdtw
+
+# Hungarian algorithm for player tracking
+lap>=0.5.12
+
+# ================================================================================
+# SYSTEM UTILITIES
+# ================================================================================
+
+# Progress bars and utilities
+tqdm>=4.64.0
+
+# Async support
+nest-asyncio>=1.5.8
+
+# File system monitoring
+watchdog
+
+# File handling and downloads
+gdown>=4.7.1
+requests>=2.28.0
+
+# Package utilities
+packaging>=20.0
+setuptools>=80.8.0
+
+# Python compatibility
+pathlib2>=2.3.7; python_version<"3.4"
+dataclasses>=0.8; python_version<"3.7"
+
+# ================================================================================
+# VERSION RESOLUTION NOTES
+# ================================================================================
+#
+# Key compatibility decisions:
+# 1. torch>=2.0.0: Works with both BST and LSTM systems
+# 2. opencv-python>=4.6.0: Compatible with both mmcv and ultralytics
+# 3. scikit-learn==1.4.2: Locked to LSTM trained model version
+# 4. streamlit==1.25.0: Stable version for gradio embedding
+# 5. Pillow>=8.4.0: macOS ARM64 compatibility maintained
+#
+# ================================================================================
