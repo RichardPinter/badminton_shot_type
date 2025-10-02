@@ -12,7 +12,7 @@ This provides a unified web interface with two classification models:
 Both models classify the same 6 shot types but use different architectures and features.
 
 Usage:
-    python combined_gradio_app.py
+    python app.py
 
 Then open the provided URL in your browser.
 """

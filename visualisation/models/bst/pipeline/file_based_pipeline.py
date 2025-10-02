@@ -163,10 +163,10 @@ class FileBased_Pipeline:
         self.bst_weight_path = Path(bst_weight_path)
         self.tracknet_model_path = Path(tracknet_model_path)
 
-        # TrackNet script - use shared visualisation/tracknet implementation
+        # TrackNet script - use shared models/tracknet implementation
         # Make path relative to this file's location to work from any working directory
         pipeline_dir = Path(__file__).parent
-        self.tracknet_script = pipeline_dir.parent.parent.parent / "tracknet" / "predict.py"
+        self.tracknet_script = pipeline_dir.parent / "tracknet" / "predict.py"
 
         # Preprocessing scripts directory (formerly src/)
         self.src_dir = pipeline_dir.parent / "preprocessing"
