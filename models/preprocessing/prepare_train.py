@@ -361,7 +361,7 @@ def detect_shuttlecock_by_TrackNetV3_with_attension(
     total_tasks: int,
     video_path: Path,
     save_dir: Path,
-    model_folder=Path("/home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/visualisation/models/tracknet"),
+    model_folder=Path("/home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/models/tracknet"),
 ):
     '''
     TrackNetV3 (using attention)
@@ -403,7 +403,7 @@ def detect_shuttlecock_by_TrackNetV3_with_rectification(
     total_tasks: int,
     video_path: Path,
     save_dir: Path,
-    model_folder=Path("/home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/visualisation/models/tracknet"),
+    model_folder=Path("/home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/models/tracknet"),
 ):
     '''
     TrackNetV3 (with rectification module)

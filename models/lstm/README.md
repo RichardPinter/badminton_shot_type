@@ -53,7 +53,7 @@ pip install -r requirements.txt
 ### Basic Usage
 
 ```bash
-cd /path/to/visualisation/lstm
+cd /path/to/models/lstm
 python run_video_classifier.py <video_path>
 ```
 

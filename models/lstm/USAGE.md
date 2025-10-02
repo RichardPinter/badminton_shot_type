@@ -7,7 +7,7 @@ All files have been copied and configured. The standalone LSTM shot classifier i
 ## 🚀 Quick Test
 
 ```bash
-cd /home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/visualisation/lstm
+cd /home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/models/lstm
 
 # Test the help message
 micromamba run -n bst311 python run_video_classifier.py --help
