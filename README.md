@@ -1,14 +1,39 @@
-# 🏸 Badminton Stroke Classification
+# 🏸 Badminton Analysis System
 
-A comprehensive AI system for classifying badminton strokes using computer vision and deep learning. This project combines human pose estimation (MMPose), shuttlecock tracking (TrackNetV3), and stroke classification (BST - Badminton Stroke Transformer) to analyze badminton videos.
+A comprehensive AI system for badminton stroke analysis with **dual interface options**. Choose between single-method BST analysis or advanced dual-method comparison.
 
-## Features
+## 🎯 Two Analysis Methods Available
 
-- **35 Stroke Types**: Classifies 35 different badminton stroke types including smashes, clears, drops, drives, and serves
-- **Real-time Analysis**: Upload videos and get instant stroke classification
-- **Multi-modal Input**: Uses human poses, shuttlecock trajectories, and player positions
-- **Web Interface**: Easy-to-use Gradio web interface
-- **High Accuracy**: Achieves 60%+ accuracy on test data with 77%+ top-2 accuracy
+### 🤖 **BST Transformer** (Original)
+- **35 Stroke Types**: Detailed classification including smashes, clears, drops, drives, and serves
+- **Shuttlecock Tracking**: TrackNetV3-based trajectory analysis
+- **Multi-modal Input**: Human poses + shuttlecock trajectories
+- **Gradio Interface**: Easy-to-use web interface
+- **High Accuracy**: 60%+ accuracy with 77%+ top-2 accuracy
+
+### 🧠 **Dual-Method Analysis** (New)
+- **BST Transformer + LSTM**: Side-by-side comparison
+- **Performance Grading**: A-D scale assessment
+- **Movement Analysis**: Court coverage and positioning
+- **Streamlit Interface**: Rich interactive dashboard
+- **Comparative Results**: Top-3 from both methods
+
+## 🚀 Quick Launch
+
+### Option 1: Interactive Launcher (Recommended)
+```bash
+python launch.py
+```
+Choose your preferred interface from the menu.
+
+### Option 2: Direct Launch
+```bash
+# BST Transformer (Gradio)
+python app.py
+
+# Dual-Method Analysis (Streamlit)
+streamlit run badminton-analysis-suite/main_app.py
+```
 
 ## Quick Start
 

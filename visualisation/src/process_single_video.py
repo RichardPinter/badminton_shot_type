@@ -144,12 +144,38 @@ def create_dummy_court_info(video_id: int) -> Dict:
     }
 
 
+def create_court_info_from_homography(H: np.ndarray, video_id: int, width: int, height: int) -> Dict:
+    """
+    Create court info dictionary from a homography matrix.
+
+    Args:
+        H: 3x3 homography matrix mapping camera coords (normalized to 1280x720) → court coords (meters)
+        video_id: Video identifier
+        width: Video width in pixels
+        height: Video height in pixels
+
+    Returns:
+        Dict with keys: H, border_L, border_R, border_U, border_D
+    """
+    # Since homography maps clicked corners to standard court dimensions,
+    # the court boundaries are fixed and known (not computed)
+    # Standard badminton court (doubles): 6.1m wide × 13.4m long
+    return {
+        'H': H,
+        'border_L': 0.0,
+        'border_R': 6.1,   # COURT_WIDTH_M
+        'border_U': 0.0,
+        'border_D': 13.4,  # COURT_LENGTH_M
+    }
+
+
 def process_single_video(
     video_path: Path,
     output_dir: Path,
     width: Optional[int] = None,
     height: Optional[int] = None,
     homography_csv: Optional[Path] = None,
+    homography_matrix: Optional[np.ndarray] = None,
     seq_len: int = 100,
     joints_center_align: bool = True,
     set_name: str = "test",
@@ -165,6 +191,7 @@ def process_single_video(
         width: Video width (auto-detected if None)
         height: Video height (auto-detected if None)
         homography_csv: Optional path to homography CSV file
+        homography_matrix: Optional 3x3 homography matrix (takes precedence over CSV)
         seq_len: Sequence length for collation (default: 100)
         joints_center_align: Whether to center-align joints (default: True)
         set_name: Dataset split name (default: "test")
@@ -215,8 +242,18 @@ def process_single_video(
         print(f"Video ID: {video_id}")
         print(f"Resolution: {width}x{height}\n")
 
-        # Create or load court info
-        if homography_csv and Path(homography_csv).exists():
+        # Create or load court info (priority: matrix > CSV > dummy)
+        if homography_matrix is not None:
+            print("🔢 Using provided homography matrix")
+            print(f"Homography matrix:\n{homography_matrix}")
+            all_court_info = {video_id: create_court_info_from_homography(
+                homography_matrix, video_id, width, height
+            )}
+            print(f"✅ Court boundaries: L={all_court_info[video_id]['border_L']:.2f}, "
+                  f"R={all_court_info[video_id]['border_R']:.2f}, "
+                  f"U={all_court_info[video_id]['border_U']:.2f}, "
+                  f"D={all_court_info[video_id]['border_D']:.2f}\n")
+        elif homography_csv and Path(homography_csv).exists():
             print(f"Loading homography from: {homography_csv}")
             homo_df = pd.read_csv(homography_csv).set_index('id')
             if video_id in homo_df.index:
@@ -362,8 +399,8 @@ Examples:
     )
     parser.add_argument(
         '--homography',
-        type=Path,
-        help='Path to homography CSV file (optional)'
+        type=str,
+        help='Homography matrix as JSON string (3x3 array) OR path to homography CSV file'
     )
     parser.add_argument(
         '--seq-len',
@@ -397,13 +434,33 @@ Examples:
 
     args = parser.parse_args()
 
+    # Parse homography argument (can be JSON matrix or CSV path)
+    homography_csv = None
+    homography_matrix = None
+
+    if args.homography:
+        # Try to parse as JSON first
+        try:
+            homography_data = json.loads(args.homography)
+            homography_matrix = np.array(homography_data, dtype=np.float32)
+            if homography_matrix.shape != (3, 3):
+                raise ValueError(f"Homography matrix must be 3x3, got {homography_matrix.shape}")
+            print(f"Parsed homography matrix from JSON")
+        except (json.JSONDecodeError, ValueError):
+            # Not JSON, treat as file path
+            homography_csv = Path(args.homography)
+            if not homography_csv.exists():
+                print(f"Warning: Homography file not found: {homography_csv}")
+                homography_csv = None
+
     try:
         output_files = process_single_video(
             video_path=args.video,
             output_dir=args.output,
             width=args.width,
             height=args.height,
-            homography_csv=args.homography,
+            homography_csv=homography_csv,
+            homography_matrix=homography_matrix,
             seq_len=args.seq_len,
             joints_center_align=not args.no_center_align,
             set_name=args.set_name,

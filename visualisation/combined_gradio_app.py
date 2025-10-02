@@ -24,8 +24,11 @@ import tempfile
 import shutil
 import os
 import logging
+import json
+import cv2
+import numpy as np
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List, Optional
 
 # Import LSTM classifier components
 sys.path.insert(0, str(Path(__file__).parent / "lstm"))
@@ -44,6 +47,80 @@ logger = logging.getLogger(__name__)
 
 # Both LSTM and BST classify the same 6 shot types
 SHOT_TYPES = ['clear', 'drive', 'drop', 'lob', 'net', 'smash']
+
+# Standard badminton court dimensions (doubles, in meters)
+COURT_WIDTH_M = 6.1
+COURT_LENGTH_M = 13.4
+
+
+# ============================================================================
+# COURT CALIBRATION HELPER FUNCTIONS
+# ============================================================================
+
+def extract_first_frame(video_path: str) -> Optional[np.ndarray]:
+    """Extract first frame from video for court calibration."""
+    cap = cv2.VideoCapture(video_path)
+    ret, frame = cap.read()
+    cap.release()
+    if ret:
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    return None
+
+
+def draw_court_corners(image: np.ndarray, corners: List[Tuple[int, int]]) -> np.ndarray:
+    """Draw clicked corner points on image with labels."""
+    img = image.copy()
+    corner_labels = ["1: Back-Left", "2: Back-Right", "3: Front-Right", "4: Front-Left"]
+    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
+
+    for i, (x, y) in enumerate(corners):
+        cv2.circle(img, (x, y), 10, colors[i], -1)
+        cv2.putText(img, corner_labels[i], (x + 15, y + 5),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, colors[i], 2)
+
+    # Draw court outline if we have all 4 points
+    if len(corners) == 4:
+        pts = np.array(corners, np.int32).reshape((-1, 1, 2))
+        cv2.polylines(img, [pts], True, (0, 255, 255), 2)
+
+    return img
+
+
+def compute_homography_from_corners(
+    corners: List[Tuple[int, int]],
+    video_width: int,
+    video_height: int
+) -> np.ndarray:
+    """
+    Compute homography matrix from 4 clicked court corners.
+
+    Args:
+        corners: List of 4 (x, y) tuples in order: back-left, back-right, front-right, front-left
+        video_width: Video frame width in pixels
+        video_height: Video frame height in pixels
+
+    Returns:
+        3x3 homography matrix H
+    """
+    # Source points (camera coordinates, normalized to 1280x720)
+    src_points = np.array([
+        [corners[0][0] * 1280 / video_width, corners[0][1] * 720 / video_height],  # back-left
+        [corners[1][0] * 1280 / video_width, corners[1][1] * 720 / video_height],  # back-right
+        [corners[2][0] * 1280 / video_width, corners[2][1] * 720 / video_height],  # front-right
+        [corners[3][0] * 1280 / video_width, corners[3][1] * 720 / video_height],  # front-left
+    ], dtype=np.float32)
+
+    # Destination points (court coordinates in meters)
+    dst_points = np.array([
+        [0.0, 0.0],                          # back-left
+        [COURT_WIDTH_M, 0.0],                # back-right
+        [COURT_WIDTH_M, COURT_LENGTH_M],     # front-right
+        [0.0, COURT_LENGTH_M],               # front-left
+    ], dtype=np.float32)
+
+    # Compute homography
+    H = cv2.getPerspectiveTransform(src_points, dst_points)
+    return H
 
 
 # ============================================================================
@@ -157,18 +234,22 @@ def classify_shot_lstm(video_file, progress=gr.Progress()) -> str:
 # BST CLASSIFIER FUNCTIONS
 # ============================================================================
 
-def classify_shot_bst(video_file, progress=gr.Progress()) -> str:
+def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> str:
     """
     Process uploaded video with BST Transformer (6 shot types with shuttlecock tracking).
 
     Args:
         video_file: Uploaded video file from Gradio
+        homography_matrix: 3x3 homography matrix (None for demo videos)
 
     Returns:
         Formatted markdown result string
     """
     if video_file is None:
         return "❌ **Error:** No video uploaded"
+
+    if homography_matrix is None:
+        return "❌ **Error:** Please calibrate court corners first by clicking 4 points on the court image above"
 
     try:
         progress(0.1, desc="Creating temporary directory...")
@@ -180,13 +261,18 @@ def classify_shot_bst(video_file, progress=gr.Progress()) -> str:
         progress(0.3, desc="Running TrackNet and MMPose preprocessing...")
 
         process_script = Path("src/process_single_video.py")
+
+        # Serialize homography matrix as JSON
+        homography_json = json.dumps(homography_matrix.tolist())
+
         cmd = [
             sys.executable,
             str(process_script),
             str(video_file),
             "-o", str(npy_dir),
             "--seq-len", "100",
-            "--keep-intermediates"
+            "--keep-intermediates",
+            "--homography", homography_json
         ]
 
         logger.info(f"Running preprocessing: {' '.join(cmd)}")
@@ -338,6 +424,148 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
             scale=2
         )
 
+    # Demo video examples
+    gr.Markdown("### 📹 Or try these demo videos from the validation set:")
+    demo_videos_path = Path("demo_videos")
+    if demo_videos_path.exists():
+        demo_videos = [
+            ("01_smash_32_1_16_16.mp4", "💥 SMASH"),
+            ("02_net_32_1_10_2.mp4", "🎾 NET"),
+            ("03_lob_32_1_10_10.mp4", "⬆️ LOB"),
+            ("04_clear_32_1_10_4.mp4", "🏸 CLEAR"),
+            ("05_drop_32_1_10_18.mp4", "⬇️ DROP"),
+            ("06_drive_32_1_13_8.mp4", "➡️ DRIVE"),
+        ]
+
+        with gr.Row():
+            for video_file, label in demo_videos:
+                video_path = str(demo_videos_path / video_file)
+                if Path(video_path).exists():
+                    gr.Button(label).click(
+                        lambda p=video_path: p,
+                        outputs=video_input
+                    )
+
+    # Court calibration section for BST
+    gr.Markdown("### 🎯 BST Court Calibration (Required for uploaded videos)")
+    gr.Markdown("Click 4 court corners in order: **1) Back-Left** → **2) Back-Right** → **3) Front-Right** → **4) Front-Left**")
+
+    with gr.Row():
+        with gr.Column(scale=1):
+            calibration_image = gr.Image(
+                label="Click 4 Court Corners",
+                type="numpy",
+                interactive=False
+            )
+            extract_frame_btn = gr.Button("📸 Extract Frame for Calibration", variant="primary")
+
+        with gr.Column(scale=1):
+            calibration_status = gr.Markdown("**Status:** Upload a video and click 'Extract Frame' to begin calibration")
+            reset_calibration_btn = gr.Button("🔄 Reset Calibration", size="sm")
+
+    # Hidden state to store corner points and homography
+    corner_points_state = gr.State([])
+    homography_state = gr.State(None)
+    video_dims_state = gr.State((1280, 720))  # width, height
+    original_frame_state = gr.State(None)  # Store original frame
+
+    # Calibration callback functions
+    def on_extract_frame(video_file):
+        """Extract first frame from video for calibration."""
+        if video_file is None:
+            return None, "**Status:** ❌ No video uploaded", [], None, (1280, 720), None
+
+        frame = extract_first_frame(video_file)
+        if frame is None:
+            return None, "**Status:** ❌ Failed to extract frame from video", [], None, (1280, 720), None
+
+        h, w = frame.shape[:2]
+        return frame, f"**Status:** ✅ Frame extracted ({w}×{h}). Click 4 court corners in order.", [], None, (w, h), frame
+
+    def on_corner_click(evt: gr.SelectData, corners, video_dims, original_frame):
+        """Handle click on calibration image to add corner point."""
+        if original_frame is None:
+            return None, corners, "**Status:** ❌ No frame loaded. Please extract frame first.", None
+
+        x, y = evt.index
+        corners = corners + [(x, y)]
+
+        # Debug: Print clicked corner
+        print(f"🎯 Corner {len(corners)} clicked: ({x}, {y})")
+
+        # Draw corners on original frame
+        annotated = draw_court_corners(original_frame, corners)
+
+        if len(corners) < 4:
+            status = f"**Status:** 📍 {len(corners)}/4 corners marked. Click corner #{len(corners)+1}"
+            return annotated, corners, status, None
+        elif len(corners) == 4:
+            # Compute homography
+            print(f"📐 Computing homography from corners: {corners}")
+            print(f"📏 Video dimensions: {video_dims[0]}×{video_dims[1]}")
+            H = compute_homography_from_corners(corners, video_dims[0], video_dims[1])
+            print(f"🔢 Homography matrix:\n{H}")
+            status = "**Status:** ✅ Calibration complete! You can now run BST classification."
+            return annotated, corners, status, H
+        else:
+            # Too many clicks - reset
+            status = "**Status:** ⚠️ Too many clicks. Please reset and try again."
+            return annotated, corners, status, None
+
+    def on_reset_calibration(original_frame):
+        """Reset calibration state."""
+        if original_frame is None:
+            return None, [], "**Status:** ❌ No frame loaded", None
+        return original_frame, [], "**Status:** 🔄 Calibration reset. Click 4 corners again.", None
+
+    # Wire up calibration events
+    extract_frame_btn.click(
+        fn=on_extract_frame,
+        inputs=[video_input],
+        outputs=[calibration_image, calibration_status, corner_points_state, homography_state, video_dims_state, original_frame_state]
+    )
+
+    calibration_image.select(
+        fn=on_corner_click,
+        inputs=[corner_points_state, video_dims_state, original_frame_state],
+        outputs=[calibration_image, corner_points_state, calibration_status, homography_state]
+    )
+
+    reset_calibration_btn.click(
+        fn=on_reset_calibration,
+        inputs=[original_frame_state],
+        outputs=[calibration_image, corner_points_state, calibration_status, homography_state]
+    )
+
+    gr.Markdown("---")
+
+    # Demo videos section
+    gr.Markdown("### 📹 Try Demo Videos (Bottom Player)")
+    gr.Markdown("**Note:** Demo videos are pre-calibrated and don't require court corner selection.")
+
+    demo_base_path = "demo_videos"
+    demo_videos = {
+        "🏸 Clear": f"{demo_base_path}/34_1_1_7.mp4",
+        "➡️ Drive": f"{demo_base_path}/36_1_20_16.mp4",
+        "⬇️ Drop": f"{demo_base_path}/34_1_26_10.mp4",
+        "⬆️ Lob": f"{demo_base_path}/32_2_13_7.mp4",
+        "🎾 Net": f"{demo_base_path}/33_2_19_4.mp4",
+        "💥 Smash": f"{demo_base_path}/35_2_33_11.mp4",
+    }
+
+    def load_demo_video(demo_path):
+        """Load demo video and set dummy homography (demo videos are pre-calibrated)."""
+        # Demo videos don't need calibration - use identity homography as marker
+        demo_homography = np.eye(3)
+        return demo_path, demo_homography, "**Status:** ✅ Demo video loaded (pre-calibrated)"
+
+    with gr.Row():
+        for label, path in demo_videos.items():
+            gr.Button(label, size="sm").click(
+                lambda p=path: load_demo_video(p),
+                outputs=[video_input, homography_state, calibration_status]
+            )
+
     gr.Markdown("---")
 
     # Side-by-side classifiers
@@ -405,7 +633,7 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
 
     bst_classify_btn.click(
         fn=classify_shot_bst,
-        inputs=[video_input],
+        inputs=[video_input, homography_state],
         outputs=[bst_result_output]
     )
 

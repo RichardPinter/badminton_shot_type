@@ -164,34 +164,47 @@ def normalize_shuttlecock(arr: np.ndarray, v_width, v_height):
     return np.stack((x_normalized, y_normalized), axis=-1)
 
 
-def check_pos_in_court(keypoints: np.ndarray, vid: int, all_court_info: dict, res_df):
+def check_pos_in_court(keypoints: np.ndarray, vid: int, all_court_info: dict, res_df, bboxes: np.ndarray = None):
     '''
     The shape of `keypoints` is (m, J, 2).
+    The shape of `bboxes` is (m, 4) - [x1, y1, x2, y2]
+
+    Modified to simply select the 2 LARGEST people by bounding box area.
+    This is more robust than court boundary checking which can be inaccurate.
 
     Output:
-        in_court: (m)
+        in_court: (m) - boolean array, True for the 2 largest people
         pos_court_normalized: (m, 2)
     '''
     n_people = keypoints.shape[0]
-    
-    feet_camera = keypoints[:, -2:, :]
-    # feet_camera: (m, J, 2), J=2
-    feet_camera = feet_camera.reshape(-1, 2).T
-    # feet_camera: (2, m*J)
 
+    # Calculate position (still use feet for position)
+    feet_camera = keypoints[:, -2:, :]
+    feet_camera = feet_camera.reshape(-1, 2).T
     feet_court = to_court_coordinate(feet_camera, vid=vid, all_court_info=all_court_info, res_df=res_df)
     feet_court = feet_court.reshape(2, n_people, -1)
-    # feet_court: (2, m, J)
-
-    pos_court = feet_court.mean(axis=-1)  # middle point between feet
-    # pos_court: (2, m)
+    pos_court = feet_court.mean(axis=-1)
     pos_court_normalized = normalize_position(pos_court, court_info=all_court_info[vid]).T
-    # pos_court_normalized: (m, 2)
-    
-    eps = 0.01  # soft border
-    dim_in_court = (pos_court_normalized > -eps) & (pos_court_normalized < (1 + eps))
-    in_court = dim_in_court[:, 0] & dim_in_court[:, 1]
-    # in_court: (m)
+
+    # Select 2 largest people by bounding box area
+    in_court = np.zeros(n_people, dtype=bool)
+
+    if bboxes is not None and len(bboxes) > 0:
+        # Calculate bbox areas
+        areas = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])
+        # Get indices of 2 largest
+        if n_people >= 2:
+            largest_2_indices = np.argsort(areas)[-2:]
+            in_court[largest_2_indices] = True
+        elif n_people == 1:
+            in_court[0] = True
+    else:
+        # Fallback: if no bboxes, just take first 2
+        if n_people >= 2:
+            in_court[0:2] = True
+        elif n_people == 1:
+            in_court[0] = True
+
     return in_court, pos_court_normalized
 
 
@@ -227,19 +240,22 @@ def detect_players_2d(
                               for person in result['predictions'][0]])  # batch_size=1 (default)
         # keypoints: (m, J, 2)
 
-        # There should be at least 2 people in the video frame.
-        failed = len(keypoints) < 2
+        # There should be at least 1 person in the video frame.
+        failed = len(keypoints) < 1
         if not failed:
-            in_court, pos_normalized = check_pos_in_court(keypoints, vid, all_court_info, res_df)
+            # Get bboxes FIRST, before filtering
+            bboxes = np.array([person['bbox'][0]
+                               for person in result['predictions'][0]])  # batch_size=1 (default)
+            # bboxes: (m, 4)
+
+            # Pass bboxes to check_pos_in_court so it can select 2 largest
+            in_court, pos_normalized = check_pos_in_court(keypoints, vid, all_court_info, res_df, bboxes)
             # in_court: (m), pos_normalized: (m, xy), xy=2
             in_court_pid = np.nonzero(in_court)[0]
-            
+
             # There should be 2 players only in a normal case.
             failed = len(in_court_pid) != 2
-            if not failed:  
-                bboxes = np.array([person['bbox'][0]
-                                   for person in result['predictions'][0]])  # batch_size=1 (default)
-                # bboxes: (m, 4)
+            if not failed:
 
                 # Make sure Top player before Bottom player (comparing y-dim)
                 if pos_normalized[in_court_pid[0], 1] > pos_normalized[in_court_pid[1], 1]:

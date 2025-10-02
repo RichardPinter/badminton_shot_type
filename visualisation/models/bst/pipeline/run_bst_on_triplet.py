@@ -16,8 +16,8 @@ from models.dataset import get_stroke_types, get_bone_pairs  # bone pairs used t
 SEQ_LEN = 100  # Data sequence length (BST_8 internally uses SEQ_LEN+1=101 for embeddings)
 N_PLAYERS = 2
 
-# Frontier classes for bottom court (6 classes)
-FRONTIER_CLASSES = ['clear', 'drive', 'drop', 'lob', 'net', 'smash']
+# Frontier classes for bottom court (6 classes) - MUST match training order
+FRONTIER_CLASSES = ['net', 'smash', 'lob', 'clear', 'drive', 'drop']
 
 def load_npy(path: Path) -> np.ndarray:
     return np.load(str(path))
