@@ -163,10 +163,10 @@ class FileBased_Pipeline:
         self.bst_weight_path = Path(bst_weight_path)
         self.tracknet_model_path = Path(tracknet_model_path)
 
-        # TrackNet script (we'll use our own implementation)
+        # TrackNet script - use shared visualisation/tracknet implementation
         # Make path relative to this file's location to work from any working directory
         pipeline_dir = Path(__file__).parent
-        self.tracknet_script = pipeline_dir.parent / "tracknet" / "predict.py"
+        self.tracknet_script = pipeline_dir.parent.parent.parent / "tracknet" / "predict.py"
 
         self._verify_components()
         print("File-based Pipeline initialized")
@@ -371,9 +371,10 @@ class FileBased_Pipeline:
 
         cmd = [
             sys.executable, str(self.tracknet_script),
-            "--video_file", str(video_path),
-            "--model_file", str(self.tracknet_model_path),
-            "--save_dir", str(tracknet_dir),
+            "--video_path", str(video_path),
+            "--model_path", str(self.tracknet_model_path),
+            "--csv_path", str(tracknet_dir / f"{video_path.stem}_ball.csv"),
+            "--output_path", str(tracknet_dir / f"{video_path.stem}_pred{video_path.suffix}"),
         ]
         print("TrackNet cmd:", " ".join(cmd))
         rc, out = _run_and_stream(

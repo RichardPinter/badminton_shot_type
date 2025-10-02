@@ -379,10 +379,13 @@ def detect_shuttlecock_by_TrackNetV3_with_attension(
     else:
         env['PYTHONPATH'] = str(tracknet_parent)
 
+    # Use weights folder for model file
+    model_path = model_folder.parent / "weights" / "tracknet_model.pt"
+
     process_args = [
         sys.executable, '-m', 'tracknet.predict',
         "--video_path", str(video_path).replace('\\', '/'),
-        "--model_path", str(model_folder/"tracknet_model.pt").replace('\\', '/'),
+        "--model_path", str(model_path).replace('\\', '/'),
         "--csv_path", str(save_dir/(video_path.stem+'_ball.csv')).replace('\\', '/'),
         # "--output_video"  # added myself
         # "--verbose"  # added myself

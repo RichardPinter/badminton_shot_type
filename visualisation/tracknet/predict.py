@@ -40,13 +40,28 @@ def parse_args():
     return parser.parse_args()
 
 def load_model(model_path, device):
-    """Load the trained TrackNet model"""
-    model = TrackNetV2(input_channels=9, out_channels=3)
+    """Load the trained TrackNet model
 
+    Supports two checkpoint formats:
+    1. New format: {'model_state_dict': ...} or direct state_dict
+    2. Old format: {'param_dict': {'model_name', 'num_frame', 'input_type'}, 'model_state_dict': ...}
+    """
     checkpoint = torch.load(model_path, map_location=device)
-    if 'model_state_dict' in checkpoint:
+
+    # Check if this is the old format with param_dict
+    if 'param_dict' in checkpoint:
+        param_dict = checkpoint['param_dict']
+        num_frame = param_dict.get('num_frame', 3)
+        # Old format uses in_dim=num_frame*3, out_dim=num_frame
+        model = TrackNetV2(input_channels=num_frame*3, out_channels=num_frame)
+        model.load_state_dict(checkpoint['model_state_dict'])
+    elif 'model_state_dict' in checkpoint:
+        # New format with explicit model_state_dict
+        model = TrackNetV2(input_channels=9, out_channels=3)
         model.load_state_dict(checkpoint['model_state_dict'])
     else:
+        # Direct state_dict
+        model = TrackNetV2(input_channels=9, out_channels=3)
         model.load_state_dict(checkpoint)
 
     model.to(device)
