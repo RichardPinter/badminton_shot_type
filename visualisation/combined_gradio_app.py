@@ -31,8 +31,8 @@ from pathlib import Path
 from typing import Tuple, List, Optional
 
 # Import LSTM classifier components
-sys.path.insert(0, str(Path(__file__).parent / "lstm"))
-from lstm.run_video_classifier import (
+sys.path.insert(0, str(Path(__file__).parent / "models" / "lstm"))
+from models.lstm.run_video_classifier import (
     extract_poses_from_video,
     convert_pose_data_to_csv,
     predict_shot_from_csv,
@@ -260,7 +260,7 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
         # Step 1: Run preprocessing (TrackNet + MMPose + collation)
         progress(0.3, desc="Running TrackNet and MMPose preprocessing...")
 
-        process_script = Path("src/process_single_video.py")
+        process_script = Path("models/preprocessing/process_single_video.py")
 
         # Serialize homography matrix as JSON
         homography_json = json.dumps(homography_matrix.tolist())

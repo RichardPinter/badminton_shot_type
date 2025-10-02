@@ -2,7 +2,7 @@
 """
 File-based video processing pipeline: MMPose → TrackNetV3 → BST (single video)
 Runs single-video MMPose, TrackNet, stages a triplet, then calls run_bst_on_triplet.py.
-Refactored to use the robust src/process_single_video.py workflow.
+Refactored to use the robust models/preprocessing/process_single_video.py workflow.
 """
 
 import re
@@ -22,10 +22,10 @@ from dataclasses import dataclass
 # Ensure local imports
 sys.path.append(str(Path(__file__).parent))
 
-# Add src/ directory to path for process_single_video imports
-src_path = Path(__file__).parent.parent.parent.parent / "src"
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
+# Add preprocessing/ directory to path for process_single_video imports
+preprocessing_path = Path(__file__).parent.parent / "preprocessing"
+if str(preprocessing_path) not in sys.path:
+    sys.path.insert(0, str(preprocessing_path))
 
 # Import video overlay module - add path before importing
 viz_core_path = Path(__file__).parent.parent.parent.parent / "core"
@@ -167,6 +167,9 @@ class FileBased_Pipeline:
         # Make path relative to this file's location to work from any working directory
         pipeline_dir = Path(__file__).parent
         self.tracknet_script = pipeline_dir.parent.parent.parent / "tracknet" / "predict.py"
+
+        # Preprocessing scripts directory (formerly src/)
+        self.src_dir = pipeline_dir.parent / "preprocessing"
 
         self._verify_components()
         print("File-based Pipeline initialized")
@@ -524,7 +527,7 @@ class FileBased_Pipeline:
     ) -> PipelineResult:
         """
         Process a video through the complete BST pipeline using the robust
-        src/process_single_video.py workflow.
+        models/preprocessing/process_single_video.py workflow.
 
         This method:
         1. Uses process_single_video() to generate .npy files (MMPose + TrackNet)
