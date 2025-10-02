@@ -1,248 +1,322 @@
-# Badminton Analysis Suite
+# Badminton Stroke Classifier
 
-A unified dual-method AI system for comprehensive badminton stroke analysis and performance assessment.
+A comparative AI system for badminton shot classification featuring two distinct deep learning approaches: LSTM (pose-only) and BST Transformer (pose + shuttlecock trajectory). Upload a video and compare predictions from both models side-by-side.
 
 ## Overview
 
-This project combines two powerful analysis systems:
+This project provides a web-based interface for classifying badminton shots using two different AI models. Both models classify the same **6 shot types** but use different architectures and input features:
 
-- **BST Transformer**: 35 stroke type classification with shuttlecock tracking
-- **LSTM Analysis**: Performance grading and movement analysis
+**Shot Types:**
+- **Clear**: High defensive shot to backcourt
+- **Drive**: Fast flat shot at mid-height
+- **Drop**: Soft shot to frontcourt
+- **Lob**: High lifting shot
+- **Net**: Shot close to the net
+- **Smash**: Powerful downward attacking shot
 
-## Features
+## Two Classification Approaches
 
-### BST Transformer Analysis
-- **35 Stroke Types**: Detailed classification including smashes, clears, drops, drives, and serves
-- **Shuttlecock Tracking**: TrackNetV3-based trajectory analysis
-- **Multi-modal Input**: Human poses (MMPose) + shuttlecock trajectories
-- **High Accuracy**: 60%+ accuracy with 77%+ top-2 accuracy
+### 1. LSTM Classifier (Pose-Only)
+- **Input**: Player pose keypoints only (13 keypoints)
+- **Pose Detection**: YOLO11x-pose
+- **Architecture**: LSTM neural network with masking
+- **Training**: 15 professional badminton matches
+- **Speed**: ~5-10 seconds per video
+- **Use Case**: Fast classification when shuttlecock tracking not needed
 
-### LSTM Analysis (Architecture Ready)
-- **Performance Grading**: A-D scale assessment
-- **Movement Analysis**: Court coverage and positioning
-- **Technical Assessment**: Stroke consistency and form evaluation
-- **Ready for Activation**: Complete architecture, awaiting model weights
-
-### Unified Interface
-- **Single Video Upload**: One input for both analysis methods
-- **Parallel Processing**: Both systems run simultaneously
-- **Comparative Results**: Top-3 predictions from each method
-- **Rich Visualizations**: Confidence charts and technical details
+### 2. BST Transformer (Pose + Shuttlecock)
+- **Input**: Player pose + shuttlecock trajectory + bone vectors
+- **Pose Detection**: MMPose (RTMPose)
+- **Shuttlecock Tracking**: TrackNetV3
+- **Architecture**: 8-layer Transformer with joint & bone features
+- **Speed**: ~30-60 seconds per video
+- **Use Case**: Higher accuracy with full trajectory analysis
 
 ## Quick Start
 
-### 1. Installation
+### Installation
 
 ```bash
-# Clone the repository (if not already in the project)
-cd badminton-analysis-suite
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate # On Windows: venv\Scripts\activate
+# Navigate to project directory
+cd badminton-stroke-classifier
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Model Weights Setup
+**Dependencies Include:**
+- PyTorch 2.0+ (for BST model)
+- TensorFlow 2.12+ (for LSTM model)
+- Ultralytics (for YOLO pose detection)
+- MMPose (for BST pose detection)
+- OpenCV, Gradio, NumPy, Pandas
 
-#### BST Transformer (Active)
-Ensure BST model weights are available in `models/bst/weights/`:
-- `bst_model.pt` - BST Transformer weights
-- `tracknet_model.pt` - TrackNetV3 weights
+### Model Weights
 
-#### LSTM Analysis (Pending)
-System is ready for LSTM weights activation:
-- Architecture: Complete
-- Integration: Ready
-- Missing: Trained model weights (.keras files)
+The following model weights should be in the `weights/` directory:
 
-### 3. Launch Application
+- **LSTM Model**: `15Matches_LSTM.h5` or `15Matches_LSTM.keras` (~1.6 MB)
+- **BST Model**: `bst_8_JnB_bone_bottom_frontier_6class.pt` (~7.5 MB)
+- **TrackNet Model**: `tracknet_model.pt` (~174 MB)
+
+All weights are included in the repository.
+
+### Launch Application
 
 ```bash
-streamlit run main_app.py
+python app.py
 ```
 
-Open http://localhost:8501 in your browser.
+The Gradio interface will open automatically in your browser (typically http://127.0.0.1:7860).
 
 ## Usage
 
-### Video Upload
-1. Upload a badminton video (MP4, AVI, MOV, MKV)
-2. Video requirements: 0.5-60 seconds, max 500MB
-3. Ensure clear view of player(s) for optimal analysis
+### Web Interface
 
-### Analysis Process
-1. **Automatic Validation**: System checks video format and quality
-2. **Dual Processing**: Both BST and LSTM systems analyze simultaneously
-3. **Results Display**: Top-3 predictions from each method
-4. **Comparison View**: Side-by-side analysis when both systems active
+1. **Upload Video**: Click to upload a badminton video (MP4, AVI, MOV, MKV)
+   - Or select a demo video from the provided examples
 
-### Results Interpretation
+2. **For BST Classifier Only**: Calibrate court corners
+   - Click "Extract Frame for Calibration"
+   - Click 4 corners in order: Back-Left → Back-Right → Front-Right → Front-Left
+   - LSTM classifier does not require calibration
 
-#### BST Transformer Results
-- **Primary Prediction**: Highest confidence stroke classification
-- **Confidence Scores**: Percentage confidence for each prediction
-- **Technical Details**: Processing pipeline information
-- **Shuttlecock Data**: Trajectory analysis (when available)
+3. **Run Classification**:
+   - Click "Classify with LSTM" for fast pose-only classification
+   - Click "Classify with BST" for full trajectory-based classification
+   - Or run both to compare results
 
-#### LSTM Analysis (When Active)
-- **Performance Grade**: Overall A-D assessment
-- **Movement Analysis**: Court coverage and efficiency
-- **Technical Consistency**: Stroke form evaluation
-- **Comparative Metrics**: Performance benchmarking
+4. **View Results**: Each classifier returns:
+   - Predicted shot type
+   - Confidence score
+   - Processing details
+   - Top-3 predictions (BST only)
 
-## Architecture
+### Demo Videos
 
-### Project Structure
+Pre-labeled demo videos are included in `demo_videos/` for testing:
+- Smash, Net, Lob, Clear, Drop, Drive examples
+- Pre-calibrated for immediate BST classification
+
+## Project Structure
+
 ```
-badminton-analysis-suite/
- main_app.py # Main Streamlit application
- core/ # Core integration layer
-    video_processor.py # Unified video handling
-    bst_wrapper.py # BST system integration
-    lstm_wrapper.py # LSTM system wrapper
-    result_formatter.py # Output standardization
- models/ # Model components
-    bst/ # BST Transformer system
-    lstm/ # LSTM analysis system
- ui/ # User interface components
-    shared_components.py # Common UI elements
-    bst_components.py # BST-specific displays
-    lstm_components.py # LSTM-specific displays
- requirements.txt # Unified dependencies
- README.md # This file
-```
-
-### System Integration Flow
-```
-Video Upload → Validation → Dual Processing → Results Formatting → UI Display
-                              ↙ ↘
-                    BST Analysis LSTM Analysis
-                    (MMPose + (YOLO Pose +
-                     TrackNetV3 + Movement +
-                     BST-8) LSTM)
+badminton-stroke-classifier/
+├── app.py                          # Main Gradio web application
+├── models/                         # Model implementations
+│   ├── bst/                        # BST Transformer system
+│   │   ├── models/                 # BST model architecture
+│   │   ├── pipeline/               # Video processing pipeline
+│   │   ├── ui/                     # BST-specific UI components
+│   │   └── app.py                  # Standalone BST app
+│   ├── lstm/                       # LSTM classifier system
+│   │   ├── run_video_classifier.py # Main LSTM pipeline
+│   │   ├── shot_classifier.py      # LSTM model wrapper
+│   │   ├── match_loader.py         # CSV data loader
+│   │   └── gradio_app.py           # Standalone LSTM app
+│   ├── tracknet/                   # TrackNetV3 shuttlecock detection
+│   │   ├── model.py                # TrackNetV2 architecture
+│   │   ├── predict.py              # Inference script
+│   │   └── utils.py                # Helper functions
+│   └── preprocessing/              # Video preprocessing utilities
+│       ├── process_single_video.py # End-to-end preprocessing
+│       └── prepare_train.py        # Training data preparation
+├── weights/                        # Model weights
+│   ├── 15Matches_LSTM.keras        # LSTM model
+│   ├── bst_8_JnB_bone_bottom_frontier_6class.pt  # BST model
+│   └── tracknet_model.pt           # TrackNet model
+├── demo_videos/                    # Sample videos for testing
+├── requirements.txt                # Python dependencies
+└── README.md                       # This file
 ```
 
 ## Technical Details
 
-### Dependencies
-- **Python**: 3.8-3.12
-- **Deep Learning**: PyTorch 2.0+, TensorFlow 2.12+
-- **Computer Vision**: OpenCV, MMPose, Ultralytics
-- **Web Interface**: Streamlit, Gradio components
-- **Visualization**: Plotly, Matplotlib
+### LSTM Classifier Pipeline
 
-### System Requirements
-- **Memory**: 8GB RAM minimum, 16GB recommended
+```
+Video Input
+    ↓
+YOLO11x-Pose Detection (17 keypoints)
+    ↓
+Extract 13 keypoints (exclude eyes/ears)
+    ↓
+Normalize & Create CSV (setN_shots.csv, setN_wireframe.csv)
+    ↓
+LSTM Model (Masked LSTM, 256 hidden units)
+    ↓
+Shot Prediction (6 classes)
+```
+
+**Key Details:**
+- Input: 41 frames × 13 keypoints × 2 coordinates (26 features)
+- Masking layer handles variable-length sequences
+- Framework: TensorFlow 2.12 / Keras 2
+- Model file: `weights/15Matches_LSTM.keras`
+
+### BST Transformer Pipeline
+
+```
+Video Input
+    ↓
+Court Calibration (Homography matrix from 4 corners)
+    ↓
+TrackNetV3 Shuttlecock Detection
+    ↓
+MMPose Player Pose Estimation (RTMPose)
+    ↓
+Data Collation (joints, positions, shuttle trajectory)
+    ↓
+BST-8 Transformer (Joint + Bone features)
+    ↓
+Shot Prediction (6 classes + confidence + top-3)
+```
+
+**Key Details:**
+- Input: Player joints (17 keypoints) + bone vectors + shuttlecock trajectory
+- Homography: Maps pixel coordinates to real court positions (6.1m × 13.4m)
+- Architecture: 8-layer Transformer with attention mechanism
+- Framework: PyTorch
+- Model file: `weights/bst_8_JnB_bone_bottom_frontier_6class.pt`
+
+### TrackNetV3 Details
+
+- **Architecture**: TrackNetV2 with CBAM attention mechanism
+- **Input**: 3 consecutive frames (RGB)
+- **Output**: Heatmap predicting shuttlecock location
+- **Checkpoint Format**: Supports both old (param_dict) and new (state_dict) formats
+- **Model file**: `weights/tracknet_model.pt`
+
+## System Requirements
+
+- **Python**: 3.8 - 3.12
+- **RAM**: 8GB minimum, 16GB recommended
 - **GPU**: Optional but recommended for faster processing
-- **Storage**: 5GB free space for models and processing
-- **Network**: Internet connection for initial model downloads
+  - CUDA-capable GPU significantly speeds up both models
+  - CPU-only mode supported but slower
+- **Storage**: ~5GB for models and temporary processing files
 
-### Performance
-- **BST Analysis**: 2-5 seconds per video
-- **LSTM Analysis**: 1-3 seconds per video (when active)
-- **Parallel Processing**: Both systems run simultaneously
-- **Memory Usage**: 2-4GB during active processing
+## Performance
 
-## Model Information
+| Metric | LSTM Classifier | BST Transformer |
+|--------|----------------|-----------------|
+| Processing Time | 5-10 seconds | 30-60 seconds |
+| Input Features | Pose only | Pose + Shuttlecock + Bone |
+| Accuracy | Good | Higher (with trajectory context) |
+| Court Calibration | Not required | Required |
+| GPU Acceleration | Optional | Recommended |
 
-### BST Transformer
-- **Architecture**: Multi-modal transformer with pose and trajectory inputs
-- **Training Data**: Professional badminton match footage
-- **Classes**: 35 distinct stroke types
-- **Accuracy**: 60.1% (77.5% top-2)
+## Standalone Apps
 
-### LSTM Classifier (Ready for Activation)
-- **Architecture**: Masked LSTM with 256 hidden units
-- **Input**: Pose sequence data from YOLO detection
-- **Output**: Shot classification + performance grading
-- **Features**: Movement analysis and technical assessment
+Each classifier can also run independently:
 
-## Development Status
+### LSTM Only
+```bash
+cd models/lstm
+python gradio_app.py
+```
 
-### Complete
-- [x] Unified project architecture
-- [x] BST Transformer integration
-- [x] LSTM system framework
-- [x] Streamlit GUI interface
-- [x] Dual-method result display
-- [x] Video processing pipeline
-- [x] Error handling and validation
+### BST Only
+```bash
+cd models/bst
+python app.py
+```
 
-### In Progress
-- [ ] BST model weight verification
-- [ ] LSTM model weight integration
-- [ ] Shuttlecock trajectory visualization
-- [ ] Court coverage heatmaps
-
-### Planned Features
-- [ ] Batch video processing
-- [ ] Historical analysis comparison
-- [ ] Training recommendation system
-- [ ] Export to PDF reports
-- [ ] Mobile-responsive interface
+### Command-Line LSTM
+```bash
+cd models/lstm
+python run_video_classifier.py <video_path>
+```
 
 ## Troubleshooting
 
-### Common Issues
+### LSTM Classifier Issues
 
-**BST Analysis Not Working**
-- Check model weights in `models/bst/weights/`
-- Verify CUDA/GPU memory availability
-- Ensure video meets format requirements
+**"No players detected in video"**
+- Ensure video shows clear view of player
+- Check video quality (>720p recommended)
+- Player should be visible throughout the clip
 
-**LSTM Analysis Pending**
-- System architecture is complete
-- Awaiting trained model weights
-- Ready for immediate activation when weights available
+**"Module not found" errors**
+- Install dependencies: `pip install -r requirements.txt`
+- Ensure using Python 3.8+
 
-**Video Upload Issues**
-- Supported formats: MP4, AVI, MOV, MKV
-- Size limit: 500MB
-- Duration: 0.5-60 seconds
+### BST Classifier Issues
 
-**Performance Issues**
-- Close other applications to free memory
-- Use GPU acceleration if available
-- Reduce video resolution if needed
+**"Please calibrate court corners first"**
+- Must click 4 court corners before running BST
+- Corners must be in order: Back-Left, Back-Right, Front-Right, Front-Left
 
-### Getting Help
-1. Check error messages in the UI
-2. Review system status in sidebar
-3. Verify model weights are present
-4. Ensure all dependencies are installed
+**"Preprocessing failed"**
+- Check TrackNet model exists: `weights/tracknet_model.pt`
+- Verify MMPose installation: `pip install mmpose mmcv`
+- Ensure sufficient GPU memory or use CPU mode
 
-## Contributing
+**"BST inference failed"**
+- Check BST model exists: `weights/bst_8_JnB_bone_bottom_frontier_6class.pt`
+- Verify intermediate files generated in temp directory
+- Use `--keep-intermediates` flag for debugging
 
-This project combines work from multiple badminton analysis systems:
-- BST Transformer: Advanced stroke classification
-- LSTM Analysis: Performance grading system
-- Integration Layer: Unified processing pipeline
+### General Issues
+
+**Out of Memory**
+- Close other applications
+- Reduce video resolution
+- Use CPU mode if GPU memory insufficient
+
+**Slow Processing**
+- GPU significantly speeds up processing
+- Shorter videos process faster (<10 seconds recommended)
+- LSTM is faster than BST if speed is priority
+
+## Development
+
+### Adding New Shot Types
+
+To extend beyond the 6 current shot types:
+
+1. Retrain both models with new labeled data
+2. Update `SHOT_TYPES` in `app.py`
+3. Update config files in `models/lstm/config.json` and BST config
+4. Retrain and replace model weights
+
+### Testing with Custom Videos
+
+```bash
+# Test LSTM standalone
+cd models/lstm
+python run_video_classifier.py /path/to/video.mp4 --keep-temp
+
+# Test BST standalone
+cd models/bst/pipeline
+python single_video_inference.py /path/to/video.mp4
+```
+
+### Model Training
+
+- **LSTM Training**: See `models/lstm/README.md` for training instructions
+- **BST Training**: See `models/bst/README.md` for training pipeline
+
+## Credits
+
+- **BST Transformer**: Badminton Stroke Transformer architecture
+- **LSTM Classifier**: Trained on 15 professional matches
+- **TrackNetV3**: Shuttlecock detection from TrackNet paper
+- **Pose Detection**: MMPose (Alibaba), Ultralytics YOLO
+- **Dataset**: ShuttleSet badminton dataset
 
 ## License
 
 See individual component licenses for specific terms.
 
-## Future Roadmap
+## Citation
 
-### Phase 1: Current Implementation
-- [x] Dual-method architecture
-- [x] BST Transformer integration
-- [x] GUI interface development
+If you use this code in your research, please cite the original BST paper and dataset:
 
-### Phase 2: LSTM Activation
-- [ ] LSTM model weight integration
-- [ ] Full dual-method functionality
-- [ ] Comparative analysis features
-
-### Phase 3: Advanced Features
-- [ ] Real-time analysis
-- [ ] Coaching recommendations
-- [ ] Performance tracking over time
-- [ ] Professional player comparisons
+```
+[Add appropriate citations here]
+```
 
 ---
 
- **Ready to analyze your badminton game with cutting-edge AI!**
+**Note**: This is a research tool. For production use, consider additional validation and error handling.
