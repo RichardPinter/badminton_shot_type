@@ -104,18 +104,18 @@ def compute_homography_from_corners(
     """
     # Source points (camera coordinates, normalized to 1280x720)
     src_points = np.array([
-        [corners[0][0] * 1280 / video_width, corners[0][1] * 720 / video_height],  # back-left
-        [corners[1][0] * 1280 / video_width, corners[1][1] * 720 / video_height],  # back-right
-        [corners[2][0] * 1280 / video_width, corners[2][1] * 720 / video_height],  # front-right
-        [corners[3][0] * 1280 / video_width, corners[3][1] * 720 / video_height],  # front-left
+        [corners[0][0] * 1280 / video_width, corners[0][1] * 720 / video_height], # back-left
+        [corners[1][0] * 1280 / video_width, corners[1][1] * 720 / video_height], # back-right
+        [corners[2][0] * 1280 / video_width, corners[2][1] * 720 / video_height], # front-right
+        [corners[3][0] * 1280 / video_width, corners[3][1] * 720 / video_height], # front-left
     ], dtype=np.float32)
 
     # Destination points (court coordinates in meters)
     dst_points = np.array([
-        [0.0, 0.0],                          # back-left
-        [COURT_WIDTH_M, 0.0],                # back-right
-        [COURT_WIDTH_M, COURT_LENGTH_M],     # front-right
-        [0.0, COURT_LENGTH_M],               # front-left
+        [0.0, 0.0], # back-left
+        [COURT_WIDTH_M, 0.0], # back-right
+        [COURT_WIDTH_M, COURT_LENGTH_M], # front-right
+        [0.0, COURT_LENGTH_M], # front-left
     ], dtype=np.float32)
 
     # Compute homography
@@ -138,7 +138,7 @@ def classify_shot_lstm(video_file, progress=gr.Progress()) -> str:
         Formatted markdown result string
     """
     if video_file is None:
-        return "❌ **Error:** No video uploaded"
+        return " **Error:**No video uploaded"
 
     try:
         progress(0.1, desc="Creating temporary directory...")
@@ -159,7 +159,7 @@ def classify_shot_lstm(video_file, progress=gr.Progress()) -> str:
         total_frames = max(frame_counts.values()) if frame_counts else 0
 
         if total_frames == 0:
-            return "❌ **Error:** No players detected in video. Please ensure the video contains visible badminton players."
+            return " **Error:**No players detected in video. Please ensure the video contains visible badminton players."
 
         # Step 2: Convert to CSV format
         progress(0.5, desc="Converting pose data to CSV...")
@@ -184,15 +184,15 @@ def classify_shot_lstm(video_file, progress=gr.Progress()) -> str:
 
         # Create result with emoji
         shot_emoji = {
-            'clear': '🏸',
-            'drive': '➡️',
-            'drop': '⬇️',
-            'lob': '⬆️',
-            'net': '🎾',
-            'smash': '💥'
+            'clear': '',
+            'drive': '',
+            'drop': '',
+            'lob': '',
+            'net': '',
+            'smash': ''
         }
 
-        emoji = shot_emoji.get(result['shot'].lower(), '🏸')
+        emoji = shot_emoji.get(result['shot'].lower(), '')
 
         result_md = f"""
 # {emoji} LSTM Classification Result
@@ -210,13 +210,13 @@ def classify_shot_lstm(video_file, progress=gr.Progress()) -> str:
 
 ### Model Information:
 - **Model:** 15Matches_LSTM (LSTM Neural Network)
-- **Shot classes:** clear, drive, drop, lob, net, smash
+- **Shot classes:**clear, drive, drop, lob, net, smash
 - **Input:** 41 frames × 13 keypoints (26 features)
-- **Framework:** TensorFlow 2.12 / Keras 2
+- **Framework:**TensorFlow 2.12 / Keras 2
 
 ---
 
-✅ Classification complete!
+ Classification complete!
 """
 
         # Cleanup
@@ -227,7 +227,7 @@ def classify_shot_lstm(video_file, progress=gr.Progress()) -> str:
 
     except Exception as e:
         logger.error(f"Error during LSTM classification: {e}", exc_info=True)
-        return f"❌ **Error occurred during processing:**\n\n```\n{str(e)}\n```"
+        return f" **Error occurred during processing:**\n\n```\n{str(e)}\n```"
 
 
 # ============================================================================
@@ -246,10 +246,10 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
         Formatted markdown result string
     """
     if video_file is None:
-        return "❌ **Error:** No video uploaded"
+        return " **Error:**No video uploaded"
 
     if homography_matrix is None:
-        return "❌ **Error:** Please calibrate court corners first by clicking 4 points on the court image above"
+        return " **Error:**Please calibrate court corners first by clicking 4 points on the court image above"
 
     try:
         progress(0.1, desc="Creating temporary directory...")
@@ -279,7 +279,7 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
 
         if result.returncode != 0:
-            error_msg = f"❌ **Preprocessing failed:**\n\n```\n{result.stderr}\n```"
+            error_msg = f" **Preprocessing failed:**\n\n```\n{result.stderr}\n```"
             return error_msg
 
         progress(0.6, desc="Preprocessing complete, running BST inference...")
@@ -298,7 +298,7 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
         shuttle_dst = Path(str(base_name) + "_shuttle.npy")
 
         if not joints_src.exists():
-            return f"❌ **Error:** Expected intermediate file not found: {joints_src}"
+            return f" **Error:**Expected intermediate file not found: {joints_src}"
 
         shutil.copy2(joints_src, joints_dst)
         shutil.copy2(pos_src, pos_dst)
@@ -320,7 +320,7 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
         bst_result = subprocess.run(bst_cmd, capture_output=True, text=True, timeout=60)
 
         if bst_result.returncode != 0:
-            error_msg = f"❌ **BST inference failed:**\n\n```\n{bst_result.stderr}\n```"
+            error_msg = f" **BST inference failed:**\n\n```\n{bst_result.stderr}\n```"
             return error_msg
 
         # Parse the output
@@ -340,21 +340,21 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
                         top3_results.append(output_lines[j])
 
         if predicted_class is None:
-            return f"❌ **Could not parse BST output:**\n\n```\n{bst_result.stdout}\n```"
+            return f" **Could not parse BST output:**\n\n```\n{bst_result.stdout}\n```"
 
         # Format top-3 results
         top3_display = "\n".join(top3_results) if top3_results else "N/A"
 
         # Create result with emoji
         shot_emoji = {
-            'clear': '🏸',
-            'drive': '➡️',
-            'drop': '⬇️',
-            'lob': '⬆️',
-            'net': '🎾',
-            'smash': '💥'
+            'clear': '',
+            'drive': '',
+            'drop': '',
+            'lob': '',
+            'net': '',
+            'smash': ''
         }
-        emoji = shot_emoji.get(predicted_class.lower(), '🏸')
+        emoji = shot_emoji.get(predicted_class.lower(), '')
 
         result_md = f"""
 # {emoji} BST Transformer Classification Result
@@ -373,32 +373,32 @@ def classify_shot_bst(video_file, homography_matrix, progress=gr.Progress()) -> 
 ---
 
 ### Processing Summary:
-✅ Video processed successfully
-✅ TrackNet shuttlecock detection
-✅ MMPose player pose estimation
-✅ BST Transformer inference
+ Video processed successfully
+ TrackNet shuttlecock detection
+ MMPose player pose estimation
+ BST Transformer inference
 
 ### Model Information:
-- **Model:** BST Transformer (8 layers, Joint & Bone features)
+- **Model:**BST Transformer (8 layers, Joint & Bone features)
 - **Shot classes:** 6 types (clear, drive, drop, lob, net, smash)
-- **Features:** Player joints, shuttlecock trajectory, bone vectors
-- **Device:** CUDA (GPU)
+- **Features:**Player joints, shuttlecock trajectory, bone vectors
+- **Device:**CUDA (GPU)
 
 Temporary files: `{temp_dir}`
 
 ---
 
-✅ Classification complete!
+ Classification complete!
 """
 
         progress(1.0, desc="Complete!")
         return result_md
 
     except subprocess.TimeoutExpired:
-        return "❌ **Error:** Processing timed out (>10 minutes)"
+        return " **Error:**Processing timed out (>10 minutes)"
     except Exception as e:
         import traceback
-        error_msg = f"❌ **Error:** {str(e)}\n\n```\n{traceback.format_exc()}\n```"
+        error_msg = f" **Error:** {str(e)}\n\n```\n{traceback.format_exc()}\n```"
         logger.error(error_msg)
         return error_msg
 
@@ -409,11 +409,11 @@ Temporary files: `{temp_dir}`
 
 with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as demo:
     gr.Markdown("""
-    # 🏸 Badminton Stroke Classification System
+    # Badminton Stroke Classification System
 
-    Compare **two different classification models** side-by-side. Both classify the same 6 shot types:
+    Compare **two different classification models**side-by-side. Both classify the same 6 shot types:
 
-    **🏸 Clear** • **➡️ Drive** • **⬇️ Drop** • **⬆️ Lob** • **🎾 Net** • **💥 Smash**
+    **Clear** • **Drive** • **Drop** • **Lob** • **Net** • **Smash**
     """)
 
     # Single shared video input at the top
@@ -425,16 +425,16 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
         )
 
     # Demo video examples
-    gr.Markdown("### 📹 Or try these demo videos from the validation set:")
+    gr.Markdown("### Or try these demo videos from the validation set:")
     demo_videos_path = Path("demo_videos")
     if demo_videos_path.exists():
         demo_videos = [
-            ("01_smash_32_1_16_16.mp4", "💥 SMASH"),
-            ("02_net_32_1_10_2.mp4", "🎾 NET"),
-            ("03_lob_32_1_10_10.mp4", "⬆️ LOB"),
-            ("04_clear_32_1_10_4.mp4", "🏸 CLEAR"),
-            ("05_drop_32_1_10_18.mp4", "⬇️ DROP"),
-            ("06_drive_32_1_13_8.mp4", "➡️ DRIVE"),
+            ("01_smash_32_1_16_16.mp4", " SMASH"),
+            ("02_net_32_1_10_2.mp4", " NET"),
+            ("03_lob_32_1_10_10.mp4", " LOB"),
+            ("04_clear_32_1_10_4.mp4", " CLEAR"),
+            ("05_drop_32_1_10_18.mp4", " DROP"),
+            ("06_drive_32_1_13_8.mp4", " DRIVE"),
         ]
 
         with gr.Row():
@@ -447,7 +447,7 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
                     )
 
     # Court calibration section for BST
-    gr.Markdown("### 🎯 BST Court Calibration (Required for uploaded videos)")
+    gr.Markdown("### BST Court Calibration (Required for uploaded videos)")
     gr.Markdown("Click 4 court corners in order: **1) Back-Left** → **2) Back-Right** → **3) Front-Right** → **4) Front-Left**")
 
     with gr.Row():
@@ -457,66 +457,66 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
                 type="numpy",
                 interactive=False
             )
-            extract_frame_btn = gr.Button("📸 Extract Frame for Calibration", variant="primary")
+            extract_frame_btn = gr.Button(" Extract Frame for Calibration", variant="primary")
 
         with gr.Column(scale=1):
-            calibration_status = gr.Markdown("**Status:** Upload a video and click 'Extract Frame' to begin calibration")
-            reset_calibration_btn = gr.Button("🔄 Reset Calibration", size="sm")
+            calibration_status = gr.Markdown("**Status:**Upload a video and click 'Extract Frame' to begin calibration")
+            reset_calibration_btn = gr.Button(" Reset Calibration", size="sm")
 
     # Hidden state to store corner points and homography
     corner_points_state = gr.State([])
     homography_state = gr.State(None)
-    video_dims_state = gr.State((1280, 720))  # width, height
-    original_frame_state = gr.State(None)  # Store original frame
+    video_dims_state = gr.State((1280, 720)) # width, height
+    original_frame_state = gr.State(None) # Store original frame
 
     # Calibration callback functions
     def on_extract_frame(video_file):
         """Extract first frame from video for calibration."""
         if video_file is None:
-            return None, "**Status:** ❌ No video uploaded", [], None, (1280, 720), None
+            return None, "**Status:** No video uploaded", [], None, (1280, 720), None
 
         frame = extract_first_frame(video_file)
         if frame is None:
-            return None, "**Status:** ❌ Failed to extract frame from video", [], None, (1280, 720), None
+            return None, "**Status:** Failed to extract frame from video", [], None, (1280, 720), None
 
         h, w = frame.shape[:2]
-        return frame, f"**Status:** ✅ Frame extracted ({w}×{h}). Click 4 court corners in order.", [], None, (w, h), frame
+        return frame, f"**Status:** Frame extracted ({w}×{h}). Click 4 court corners in order.", [], None, (w, h), frame
 
     def on_corner_click(evt: gr.SelectData, corners, video_dims, original_frame):
         """Handle click on calibration image to add corner point."""
         if original_frame is None:
-            return None, corners, "**Status:** ❌ No frame loaded. Please extract frame first.", None
+            return None, corners, "**Status:** No frame loaded. Please extract frame first.", None
 
         x, y = evt.index
         corners = corners + [(x, y)]
 
         # Debug: Print clicked corner
-        print(f"🎯 Corner {len(corners)} clicked: ({x}, {y})")
+        print(f" Corner {len(corners)} clicked: ({x}, {y})")
 
         # Draw corners on original frame
         annotated = draw_court_corners(original_frame, corners)
 
         if len(corners) < 4:
-            status = f"**Status:** 📍 {len(corners)}/4 corners marked. Click corner #{len(corners)+1}"
+            status = f"**Status:** {len(corners)}/4 corners marked. Click corner #{len(corners)+1}"
             return annotated, corners, status, None
         elif len(corners) == 4:
             # Compute homography
-            print(f"📐 Computing homography from corners: {corners}")
-            print(f"📏 Video dimensions: {video_dims[0]}×{video_dims[1]}")
+            print(f" Computing homography from corners: {corners}")
+            print(f" Video dimensions: {video_dims[0]}×{video_dims[1]}")
             H = compute_homography_from_corners(corners, video_dims[0], video_dims[1])
-            print(f"🔢 Homography matrix:\n{H}")
-            status = "**Status:** ✅ Calibration complete! You can now run BST classification."
+            print(f" Homography matrix:\n{H}")
+            status = "**Status:** Calibration complete! You can now run BST classification."
             return annotated, corners, status, H
         else:
             # Too many clicks - reset
-            status = "**Status:** ⚠️ Too many clicks. Please reset and try again."
+            status = "**Status:** Too many clicks. Please reset and try again."
             return annotated, corners, status, None
 
     def on_reset_calibration(original_frame):
         """Reset calibration state."""
         if original_frame is None:
-            return None, [], "**Status:** ❌ No frame loaded", None
-        return original_frame, [], "**Status:** 🔄 Calibration reset. Click 4 corners again.", None
+            return None, [], "**Status:** No frame loaded", None
+        return original_frame, [], "**Status:** Calibration reset. Click 4 corners again.", None
 
     # Wire up calibration events
     extract_frame_btn.click(
@@ -540,24 +540,24 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
     gr.Markdown("---")
 
     # Demo videos section
-    gr.Markdown("### 📹 Try Demo Videos (Bottom Player)")
-    gr.Markdown("**Note:** Demo videos are pre-calibrated and don't require court corner selection.")
+    gr.Markdown("### Try Demo Videos (Bottom Player)")
+    gr.Markdown("**Note:**Demo videos are pre-calibrated and don't require court corner selection.")
 
     demo_base_path = "demo_videos"
     demo_videos = {
-        "🏸 Clear": f"{demo_base_path}/34_1_1_7.mp4",
-        "➡️ Drive": f"{demo_base_path}/36_1_20_16.mp4",
-        "⬇️ Drop": f"{demo_base_path}/34_1_26_10.mp4",
-        "⬆️ Lob": f"{demo_base_path}/32_2_13_7.mp4",
-        "🎾 Net": f"{demo_base_path}/33_2_19_4.mp4",
-        "💥 Smash": f"{demo_base_path}/35_2_33_11.mp4",
+        " Clear": f"{demo_base_path}/34_1_1_7.mp4",
+        " Drive": f"{demo_base_path}/36_1_20_16.mp4",
+        " Drop": f"{demo_base_path}/34_1_26_10.mp4",
+        " Lob": f"{demo_base_path}/32_2_13_7.mp4",
+        " Net": f"{demo_base_path}/33_2_19_4.mp4",
+        " Smash": f"{demo_base_path}/35_2_33_11.mp4",
     }
 
     def load_demo_video(demo_path):
         """Load demo video and set dummy homography (demo videos are pre-calibrated)."""
         # Demo videos don't need calibration - use identity homography as marker
         demo_homography = np.eye(3)
-        return demo_path, demo_homography, "**Status:** ✅ Demo video loaded (pre-calibrated)"
+        return demo_path, demo_homography, "**Status:** Demo video loaded (pre-calibrated)"
 
     with gr.Row():
         for label, path in demo_videos.items():
@@ -575,17 +575,17 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
         # ====================================================================
         with gr.Column(scale=1):
             gr.Markdown("""
-            ## 🎯 LSTM Classifier
+            ## LSTM Classifier
 
             **Fast pose-only classification**
-            - ⚡ Processing: ~5-10 seconds
-            - 🎭 Input: Player pose only (13 keypoints)
-            - 🧠 Architecture: LSTM Neural Network
-            - 📊 Trained on 15 matches
+            - Processing: ~5-10 seconds
+            - Input: Player pose only (13 keypoints)
+            - Architecture: LSTM Neural Network
+            - Trained on 15 matches
             """)
 
             lstm_classify_btn = gr.Button(
-                "Classify with LSTM 🎯",
+                "Classify with LSTM ",
                 variant="primary",
                 size="lg",
                 scale=1
@@ -602,17 +602,17 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
         # ====================================================================
         with gr.Column(scale=1):
             gr.Markdown("""
-            ## 🚀 BST Transformer
+            ## BST Transformer
 
             **Advanced pose + shuttlecock classification**
-            - ⏱️ Processing: ~30-60 seconds
-            - 🎾 Input: Pose + shuttlecock trajectory
-            - 🤖 Architecture: Transformer (8 layers)
-            - 📈 Higher accuracy with context
+            - ⏱ Processing: ~30-60 seconds
+            - Input: Pose + shuttlecock trajectory
+            - Architecture: Transformer (8 layers)
+            - Higher accuracy with context
             """)
 
             bst_classify_btn = gr.Button(
-                "Classify with BST 🚀",
+                "Classify with BST ",
                 variant="secondary",
                 size="lg",
                 scale=1
@@ -657,22 +657,22 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
     ## Technical Details
 
     ### LSTM Classifier
-    - **Architecture:** LSTM Neural Network
+    - **Architecture:**LSTM Neural Network
     - **Training:** 15 professional badminton matches
     - **Input:** 41 frames × 13 keypoints (26 features)
-    - **Pose extraction:** YOLO11x-pose
-    - **Framework:** TensorFlow 2.12 / Keras 2
+    - **Pose extraction:**YOLO11x-pose
+    - **Framework:**TensorFlow 2.12 / Keras 2
 
     ### BST Transformer
-    - **Architecture:** Transformer with 8 layers
-    - **Features:** Joint positions, bone vectors, shuttlecock trajectory
-    - **Shuttlecock detection:** TrackNetV3
-    - **Pose extraction:** MMPose (RTMPose)
-    - **Framework:** PyTorch
+    - **Architecture:**Transformer with 8 layers
+    - **Features:**Joint positions, bone vectors, shuttlecock trajectory
+    - **Shuttlecock detection:**TrackNetV3
+    - **Pose extraction:**MMPose (RTMPose)
+    - **Framework:**PyTorch
 
     ---
 
-    **Note:** For best results, ensure videos show clear view of the player performing the shot.
+    **Note:**For best results, ensure videos show clear view of the player performing the shot.
     """)
 
 

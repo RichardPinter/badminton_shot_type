@@ -1,15 +1,15 @@
-# Badminton Analysis Suite
+# 🏸 Badminton Analysis Suite
 
 A unified dual-method AI system for comprehensive badminton stroke analysis and performance assessment.
 
-## Overview
+## 🎯 Overview
 
 This project combines two powerful analysis systems:
 
-- **BST Transformer**: 35 stroke type classification with shuttlecock tracking
-- **LSTM Analysis**: Performance grading and movement analysis
+- **🤖 BST Transformer**: 35 stroke type classification with shuttlecock tracking
+- **🧠 LSTM Analysis**: Performance grading and movement analysis
 
-## Features
+## ✨ Features
 
 ### BST Transformer Analysis
 - **35 Stroke Types**: Detailed classification including smashes, clears, drops, drives, and serves
@@ -29,7 +29,7 @@ This project combines two powerful analysis systems:
 - **Comparative Results**: Top-3 predictions from each method
 - **Rich Visualizations**: Confidence charts and technical details
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Installation
 
@@ -39,7 +39,7 @@ cd badminton-analysis-suite
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -66,7 +66,7 @@ streamlit run main_app.py
 
 Open http://localhost:8501 in your browser.
 
-## Usage
+## 📱 Usage
 
 ### Video Upload
 1. Upload a badminton video (MP4, AVI, MOV, MKV)
@@ -93,39 +93,39 @@ Open http://localhost:8501 in your browser.
 - **Technical Consistency**: Stroke form evaluation
 - **Comparative Metrics**: Performance benchmarking
 
-## Architecture
+## 🏗️ Architecture
 
 ### Project Structure
 ```
 badminton-analysis-suite/
- main_app.py # Main Streamlit application
- core/ # Core integration layer
-    video_processor.py # Unified video handling
-    bst_wrapper.py # BST system integration
-    lstm_wrapper.py # LSTM system wrapper
-    result_formatter.py # Output standardization
- models/ # Model components
-    bst/ # BST Transformer system
-    lstm/ # LSTM analysis system
- ui/ # User interface components
-    shared_components.py # Common UI elements
-    bst_components.py # BST-specific displays
-    lstm_components.py # LSTM-specific displays
- requirements.txt # Unified dependencies
- README.md # This file
+├── main_app.py                    # Main Streamlit application
+├── core/                          # Core integration layer
+│   ├── video_processor.py         # Unified video handling
+│   ├── bst_wrapper.py            # BST system integration
+│   ├── lstm_wrapper.py           # LSTM system wrapper
+│   └── result_formatter.py       # Output standardization
+├── models/                        # Model components
+│   ├── bst/                      # BST Transformer system
+│   └── lstm/                     # LSTM analysis system
+├── ui/                           # User interface components
+│   ├── shared_components.py      # Common UI elements
+│   ├── bst_components.py         # BST-specific displays
+│   └── lstm_components.py        # LSTM-specific displays
+├── requirements.txt              # Unified dependencies
+└── README.md                     # This file
 ```
 
 ### System Integration Flow
 ```
 Video Upload → Validation → Dual Processing → Results Formatting → UI Display
-                              ↙ ↘
-                    BST Analysis LSTM Analysis
-                    (MMPose + (YOLO Pose +
-                     TrackNetV3 + Movement +
-                     BST-8) LSTM)
+                              ↙         ↘
+                    BST Analysis    LSTM Analysis
+                    (MMPose +       (YOLO Pose +
+                     TrackNetV3 +    Movement +
+                     BST-8)          LSTM)
 ```
 
-## Technical Details
+## 🔧 Technical Details
 
 ### Dependencies
 - **Python**: 3.8-3.12
@@ -146,7 +146,7 @@ Video Upload → Validation → Dual Processing → Results Formatting → UI Di
 - **Parallel Processing**: Both systems run simultaneously
 - **Memory Usage**: 2-4GB during active processing
 
-## Model Information
+## 📊 Model Information
 
 ### BST Transformer
 - **Architecture**: Multi-modal transformer with pose and trajectory inputs
@@ -160,9 +160,9 @@ Video Upload → Validation → Dual Processing → Results Formatting → UI Di
 - **Output**: Shot classification + performance grading
 - **Features**: Movement analysis and technical assessment
 
-## Development Status
+## 🚧 Development Status
 
-### Complete
+### ✅ Complete
 - [x] Unified project architecture
 - [x] BST Transformer integration
 - [x] LSTM system framework
@@ -171,20 +171,20 @@ Video Upload → Validation → Dual Processing → Results Formatting → UI Di
 - [x] Video processing pipeline
 - [x] Error handling and validation
 
-### In Progress
+### 🔄 In Progress
 - [ ] BST model weight verification
 - [ ] LSTM model weight integration
 - [ ] Shuttlecock trajectory visualization
 - [ ] Court coverage heatmaps
 
-### Planned Features
+### 📋 Planned Features
 - [ ] Batch video processing
 - [ ] Historical analysis comparison
 - [ ] Training recommendation system
 - [ ] Export to PDF reports
 - [ ] Mobile-responsive interface
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
@@ -214,18 +214,18 @@ Video Upload → Validation → Dual Processing → Results Formatting → UI Di
 3. Verify model weights are present
 4. Ensure all dependencies are installed
 
-## Contributing
+## 🤝 Contributing
 
 This project combines work from multiple badminton analysis systems:
 - BST Transformer: Advanced stroke classification
 - LSTM Analysis: Performance grading system
 - Integration Layer: Unified processing pipeline
 
-## License
+## 📄 License
 
 See individual component licenses for specific terms.
 
-## Future Roadmap
+## 🎯 Future Roadmap
 
 ### Phase 1: Current Implementation
 - [x] Dual-method architecture
@@ -245,4 +245,4 @@ See individual component licenses for specific terms.
 
 ---
 
- **Ready to analyze your badminton game with cutting-edge AI!**
+🏸 **Ready to analyze your badminton game with cutting-edge AI!**
