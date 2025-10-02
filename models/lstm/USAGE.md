@@ -1,10 +1,10 @@
 # Quick Start Guide - LSTM Shot Classifier
 
-## ✅ Setup Complete!
+## Setup Complete!
 
 All files have been copied and configured. The standalone LSTM shot classifier is ready to use.
 
-## 🚀 Quick Test
+## Quick Test
 
 ```bash
 cd /home/richard/Desktop/Projects/Personal/UNE/BST-Badminton-Stroke-type-Transformer/badminton-stroke-classifier/models/lstm
@@ -16,28 +16,28 @@ micromamba run -n bst311 python run_video_classifier.py --help
 micromamba run -n bst311 python run_video_classifier.py <your_video.mp4>
 ```
 
-## 📁 Files Copied
+## Files Copied
 
 ### Core Shot Classifier (from `Badminton/src/`)
-✅ `shot_classifier.py` - LSTM classifier
-✅ `match_loader.py` - CSV data loader
-✅ `model.py` - ShotClassification dataclass (simplified)
-✅ `exceptions.py` - Error handling
+ `shot_classifier.py` - LSTM classifier
+ `match_loader.py` - CSV data loader
+ `model.py` - ShotClassification dataclass (simplified)
+ `exceptions.py` - Error handling
 
 ### Pose Extraction Pipeline (from `Badminton/`)
-✅ `badmintonplayeranalysis_main.py` - YOLO pose extraction
-✅ `config.py` - Configuration & pose definitions
-✅ `main_helper_functions.py` - Helper utilities
-✅ `feature_extraction.py` - Feature extraction utilities
+ `badmintonplayeranalysis_main.py` - YOLO pose extraction
+ `config.py` - Configuration & pose definitions
+ `main_helper_functions.py` - Helper utilities
+ `feature_extraction.py` - Feature extraction utilities
 
 ### New Files Created
-✅ `run_video_classifier.py` - Main executable script
-✅ `config.json` - 6 shot types configuration
-✅ `README.md` - Full documentation
-✅ `requirements.txt` - Dependencies
-✅ `USAGE.md` - This file
+ `run_video_classifier.py` - Main executable script
+ `config.json` - 6 shot types configuration
+ `README.md` - Full documentation
+ `requirements.txt` - Dependencies
+ `USAGE.md` - This file
 
-## 🎯 Shot Types (6 Classes)
+## Shot Types (6 Classes)
 
 The model predicts one of these 6 shot types:
 1. **clear** - High defensive shot to backcourt
@@ -47,14 +47,14 @@ The model predicts one of these 6 shot types:
 5. **net** - Shot close to the net
 6. **smash** - Powerful downward attacking shot
 
-## 🔧 Model Information
+## Model Information
 
 - **Weight File**: `../weights/15Matches_LSTM.keras` (1.6 MB)
 - **Architecture**: LSTM with masking for variable-length sequences
 - **Input**: Pose keypoints (17 keypoints × 2 coords per frame)
 - **Training Data**: 15 professional badminton matches
 
-## 📖 Example Usage
+## Example Usage
 
 ### Basic (with interactive court selection)
 ```bash
@@ -79,7 +79,7 @@ micromamba run -n bst311 python run_video_classifier.py video.mp4 \
 micromamba run -n bst311 python run_video_classifier.py video.mp4 --keep-temp
 ```
 
-## 📊 Expected Output
+## Expected Output
 
 ```
 ============================================================
@@ -106,7 +106,7 @@ Running LSTM prediction with model: ../weights/15Matches_LSTM.keras
 Prediction complete: smash
 
 ============================================================
-🏸 SHOT CLASSIFICATION RESULT
+ SHOT CLASSIFICATION RESULT
 ============================================================
 Predicted Shot Type: SMASH
 Confidence: 0.92
@@ -114,7 +114,7 @@ All Predictions: ['smash']
 ============================================================
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Import Errors
 Make sure you're using the correct environment:
@@ -131,16 +131,16 @@ If you see "ModuleNotFoundError", install dependencies:
 micromamba run -n bst311 pip install -r requirements.txt
 ```
 
-## 📝 Next Steps
+## Next Steps
 
-1. **Test with a sample video** from your dataset
-2. **Verify predictions** against ground truth labels
+1. **Test with a sample video**from your dataset
+2. **Verify predictions**against ground truth labels
 3. **Adjust parameters** (frame range, court points) as needed
-4. **Integrate** into your larger pipeline if needed
+4. **Integrate**into your larger pipeline if needed
 
-## 💡 Tips
+## Tips
 
-- **First run is slower** due to YOLO model download
-- **Use `--keep-temp`** to inspect intermediate CSV files
-- **Court corners** can be saved and reused for videos from same source
-- **GPU recommended** for faster pose extraction (CPU works but slower)
+- **First run is slower**due to YOLO model download
+- **Use `--keep-temp`**to inspect intermediate CSV files
+- **Court corners**can be saved and reused for videos from same source
+- **GPU recommended**for faster pose extraction (CPU works but slower)

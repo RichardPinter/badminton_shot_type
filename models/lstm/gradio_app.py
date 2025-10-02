@@ -51,7 +51,7 @@ def classify_shot(video_file) -> Tuple[str, str, str]:
         Tuple of (shot_type, confidence, details)
     """
     if video_file is None:
-        return "❌ Error", "No video uploaded", ""
+        return " Error", "No video uploaded", ""
 
     try:
         # Create temporary directory for processing
@@ -73,7 +73,7 @@ def classify_shot(video_file) -> Tuple[str, str, str]:
         total_frames = max(frame_counts.values()) if frame_counts else 0
 
         if total_frames == 0:
-            return "❌ Error", "No players detected in video", "Could not extract pose data from the video. Please ensure the video contains visible badminton players."
+            return " Error", "No players detected in video", "Could not extract pose data from the video. Please ensure the video contains visible badminton players."
 
         # Step 2: Convert to CSV format
         logger.info("Step 2: Converting pose data to CSV...")
@@ -119,15 +119,15 @@ def classify_shot(video_file) -> Tuple[str, str, str]:
 
         # Create result with emoji
         shot_emoji = {
-            'clear': '🏸',
-            'drive': '➡️',
-            'drop': '⬇️',
-            'lob': '⬆️',
-            'net': '🎾',
-            'smash': '💥'
+            'clear': '',
+            'drive': '',
+            'drop': '',
+            'lob': '',
+            'net': '',
+            'smash': ''
         }
 
-        emoji = shot_emoji.get(result['shot'].lower(), '🏸')
+        emoji = shot_emoji.get(result['shot'].lower(), '')
         shot_display = f"{emoji} {shot_type}"
         confidence_display = f"{confidence:.1%}"
 
@@ -135,23 +135,23 @@ def classify_shot(video_file) -> Tuple[str, str, str]:
 
     except Exception as e:
         logger.error(f"Error during classification: {e}", exc_info=True)
-        return "❌ Error", "0%", f"**Error occurred during processing:**\n\n{str(e)}"
+        return " Error", "0%", f"**Error occurred during processing:**\n\n{str(e)}"
 
 
 # Create Gradio interface
 with gr.Blocks(title="Badminton Shot Classifier", theme=gr.themes.Soft()) as demo:
     gr.Markdown("""
-    # 🏸 Badminton Shot Classifier
+    # Badminton Shot Classifier
 
     Upload a badminton video to classify the shot type using LSTM deep learning model.
 
     **Supported shot types:**
-    - 🏸 **Clear** - High defensive shot to the back
-    - ➡️ **Drive** - Fast flat shot
-    - ⬇️ **Drop** - Gentle shot that falls close to net
-    - ⬆️ **Lob** - High underhand shot
-    - 🎾 **Net** - Shot played at the net
-    - 💥 **Smash** - Powerful downward shot
+    - **Clear** - High defensive shot to the back
+    - **Drive** - Fast flat shot
+    - **Drop** - Gentle shot that falls close to net
+    - **Lob** - High underhand shot
+    - **Net** - Shot played at the net
+    - **Smash** - Powerful downward shot
     """)
 
     with gr.Row():
@@ -160,7 +160,7 @@ with gr.Blocks(title="Badminton Shot Classifier", theme=gr.themes.Soft()) as dem
                 label="Upload Badminton Video",
                 format="mp4"
             )
-            classify_btn = gr.Button("Classify Shot 🎯", variant="primary", size="lg")
+            classify_btn = gr.Button("Classify Shot ", variant="primary", size="lg")
 
             gr.Markdown("""
             ### Instructions:
@@ -169,7 +169,7 @@ with gr.Blocks(title="Badminton Shot Classifier", theme=gr.themes.Soft()) as dem
             3. Wait for processing (usually 5-10 seconds)
             4. View the predicted shot type and details
 
-            **Note:** Best results with clear view of the player performing the shot.
+            **Note:**Best results with clear view of the player performing the shot.
             """)
 
         with gr.Column():
@@ -201,8 +201,8 @@ with gr.Blocks(title="Badminton Shot Classifier", theme=gr.themes.Soft()) as dem
     ---
     ### About
     This classifier uses:
-    - **YOLO11x-pose** for pose extraction
-    - **LSTM neural network** for shot classification
+    - **YOLO11x-pose**for pose extraction
+    - **LSTM neural network**for shot classification
     - Trained on 15 professional badminton matches
 
     Model trained with TensorFlow 2.12 / Keras 2

@@ -115,22 +115,22 @@ This will preserve the generated CSV files in a temporary directory for inspecti
 
 ```
 lstm/
-├── run_video_classifier.py       # Main script
-├── shot_classifier.py             # LSTM classifier
-├── match_loader.py                # Data loading utilities
-├── model.py                       # ShotClassification dataclass
-├── exceptions.py                  # Custom exceptions
-├── badmintonplayeranalysis_main.py # Pose extraction
-├── config.py                      # Configuration
-├── main_helper_functions.py       # Helper functions
-├── config.json                    # Shot types config
-└── README.md                      # This file
+ run_video_classifier.py # Main script
+ shot_classifier.py # LSTM classifier
+ match_loader.py # Data loading utilities
+ model.py # ShotClassification dataclass
+ exceptions.py # Custom exceptions
+ badmintonplayeranalysis_main.py # Pose extraction
+ config.py # Configuration
+ main_helper_functions.py # Helper functions
+ config.json # Shot types config
+ README.md # This file
 ```
 
 ## Output Format
 
 ```
-🏸 SHOT CLASSIFICATION RESULT
+ SHOT CLASSIFICATION RESULT
 ============================================================
 Predicted Shot Type: SMASH
 Confidence: 0.92

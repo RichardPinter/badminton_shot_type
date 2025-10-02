@@ -15,14 +15,14 @@ def get_stroke_types(side='Both', pad_to_same_len=False):
     ]
     if pad_to_same_len:
         max_len = max([len(e) for e in class_ls])
-        class_ls = [e.ljust(max_len, '　') for e in class_ls]
+        class_ls = [e.ljust(max_len, '') for e in class_ls]
         match side:
             case 'Both':
-                class_ls = ['Top_'+s+' '*3 for s in class_ls] + ['Bottom_'+s for s in class_ls] + ['none'.ljust(max_len, '　')+' '*7]
+                class_ls = ['Top_'+s+' '*3 for s in class_ls] + ['Bottom_'+s for s in class_ls] + ['none'.ljust(max_len, '')+' '*7]
             case 'Top':
-                class_ls = ['Top_'+s+' '*3 for s in class_ls] + ['none'.ljust(max_len, '　')+' '*4]
+                class_ls = ['Top_'+s+' '*3 for s in class_ls] + ['none'.ljust(max_len, '')+' '*4]
             case 'Bottom':
-                class_ls = ['Bottom_'+s for s in class_ls] + ['none'.ljust(max_len, '　')+' '*7]
+                class_ls = ['Bottom_'+s for s in class_ls] + ['none'.ljust(max_len, '')+' '*7]
 
         return class_ls
 
@@ -41,11 +41,11 @@ def get_bone_pairs(skeleton_format='coco'):
     match skeleton_format:
         case 'coco':
             pairs = [
-                (0,1),(0,2),(1,2),(1,3),(2,4),   # head
-                (3,5),(4,6),                     # ears to shoulders
-                (5,7),(7,9),(6,8),(8,10),        # arms
-                (5,6),(5,11),(6,12),(11,12),     # torso
-                (11,13),(13,15),(12,14),(14,16)  # legs
+                (0,1),(0,2),(1,2),(1,3),(2,4), # head
+                (3,5),(4,6), # ears to shoulders
+                (5,7),(7,9),(6,8),(8,10), # arms
+                (5,6),(5,11),(6,12),(11,12), # torso
+                (11,13),(13,15),(12,14),(14,16) # legs
             ]
         case _:
             raise NotImplementedError
@@ -111,8 +111,8 @@ def interpolate_joints(joints: np.ndarray, pairs) -> np.ndarray:
         mid_j = np.where((start_j != 0.0) & (end_j != 0.0), (start_j + end_j) / 2, 0.0)
         # mid_j: (t, m, 2)
         mid_joints.append(mid_j)
-    bones_center = np.stack(mid_joints, axis=-2)  # bones_center: (t, m, B, 2)
-    return np.concatenate((joints, bones_center), axis=-2)  # (t, m, J+B, 2)
+    bones_center = np.stack(mid_joints, axis=-2) # bones_center: (t, m, B, 2)
+    return np.concatenate((joints, bones_center), axis=-2) # (t, m, J+B, 2)
 
 
 class RandomTranslation(v2.Transform):

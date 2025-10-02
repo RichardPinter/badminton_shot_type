@@ -32,23 +32,23 @@ from tqdm import tqdm
 
 # COCO keypoint mapping (17 keypoints)
 COCO_KEYPOINTS = [
-    'nose',           # 0
-    'left_eye',       # 1  - EXCLUDE
-    'right_eye',      # 2  - EXCLUDE
-    'left_ear',       # 3  - EXCLUDE
-    'right_ear',      # 4  - EXCLUDE
-    'left_shoulder',  # 5
+    'nose', # 0
+    'left_eye', # 1 - EXCLUDE
+    'right_eye', # 2 - EXCLUDE
+    'left_ear', # 3 - EXCLUDE
+    'right_ear', # 4 - EXCLUDE
+    'left_shoulder', # 5
     'right_shoulder', # 6
-    'left_elbow',     # 7
-    'right_elbow',    # 8
-    'left_wrist',     # 9
-    'right_wrist',    # 10
-    'left_hip',       # 11
-    'right_hip',      # 12
-    'left_knee',      # 13
-    'right_knee',     # 14
-    'left_ankle',     # 15
-    'right_ankle'     # 16
+    'left_elbow', # 7
+    'right_elbow', # 8
+    'left_wrist', # 9
+    'right_wrist', # 10
+    'left_hip', # 11
+    'right_hip', # 12
+    'left_knee', # 13
+    'right_knee', # 14
+    'left_ankle', # 15
+    'right_ankle' # 16
 ]
 
 # LSTM model keypoints (13 keypoints) - indices in COCO format
@@ -94,25 +94,25 @@ def get_38_to_6_class_mapping():
 
     # Mapping from English stroke name to frontier class (from ShuttleSetMapping.csv)
     stroke_to_frontier = {
-        'drop': 'net',                      # 放小球
-        'net_shot': 'net',                  # 擋小球
-        'smash': 'smash',                   # 殺球
-        'passive_drop': 'drop',             # 點扣
-        'lob': 'lob',                       # 挑球
-        'defensive_return_lob': 'lob',      # 防守回挑
-        'clear': 'clear',                   # 長球
-        'drive': 'drive',                   # 平球
-        'back-court_drive': 'drive',        # 後場抽平球
-        'drive_variant': 'drop',            # 切球
-        'cross-court_net_shot': 'drop',     # 過渡切球
-        'push': 'drive',                    # 推球
-        'rush': 'drive',                    # 撲球
-        'defensive_return_drive': 'drive',  # 防守回抽
-        'return_net': 'net',                # 勾球
-        'short_service': 'net',             # 發短球
-        'long_service': 'net',              # 發長球
-        'wrist_smash': 'smash',             # wrist smash
-        'none': None                        # 未知球種 (unknown)
+        'drop': 'net', #
+        'net_shot': 'net', #
+        'smash': 'smash', #
+        'passive_drop': 'drop', #
+        'lob': 'lob', #
+        'defensive_return_lob': 'lob', #
+        'clear': 'clear', #
+        'drive': 'drive', #
+        'back-court_drive': 'drive', #
+        'drive_variant': 'drop', #
+        'cross-court_net_shot': 'drop', #
+        'push': 'drive', #
+        'rush': 'drive', #
+        'defensive_return_drive': 'drive', #
+        'return_net': 'net', #
+        'short_service': 'net', #
+        'long_service': 'net', #
+        'wrist_smash': 'smash', # wrist smash
+        'none': None # (unknown)
     }
 
     # Create 38-class mapping (Top + Bottom for each stroke)
@@ -123,13 +123,13 @@ def get_38_to_6_class_mapping():
 
         if frontier is None:
             # Unknown class - map to None
-            mapping_38_to_6[i] = None  # Top_none
-            mapping_38_to_6[i + 19] = None  # Bottom_none
+            mapping_38_to_6[i] = None # Top_none
+            mapping_38_to_6[i + 19] = None # Bottom_none
         else:
             # Map to frontier class index
             frontier_idx = FRONTIER_CLASSES.index(frontier)
-            mapping_38_to_6[i] = frontier_idx  # Top_*
-            mapping_38_to_6[i + 19] = frontier_idx  # Bottom_*
+            mapping_38_to_6[i] = frontier_idx # Top_*
+            mapping_38_to_6[i + 19] = frontier_idx # Bottom_*
 
     return mapping_38_to_6
 
@@ -159,11 +159,11 @@ def load_bst_data(npy_dir: str, split: str) -> Tuple[np.ndarray, np.ndarray]:
 
     print(f"Loading joints from: {joints_path}")
     joints_data = np.load(joints_path)
-    print(f"  Shape: {joints_data.shape}")
+    print(f" Shape: {joints_data.shape}")
 
     print(f"Loading labels from: {labels_path}")
     labels = np.load(labels_path)
-    print(f"  Shape: {labels.shape}")
+    print(f" Shape: {labels.shape}")
 
     return joints_data, labels
 
@@ -276,7 +276,7 @@ def create_lstm_csv_structure(
     # Print distribution
     print("\nDataset distribution:")
     for shot_type, indices in samples_by_type.items():
-        print(f"  {shot_type}: {len(indices)} samples")
+        print(f" {shot_type}: {len(indices)} samples")
 
     # Create one "match" directory per shot type
     sample_idx = 0
@@ -294,7 +294,7 @@ def create_lstm_csv_structure(
             shot_class = shot_type
 
             # Get joint data for this sample
-            sample_joints = joints_data[global_idx]  # shape: (41, 2, 13, 2)
+            sample_joints = joints_data[global_idx] # shape: (41, 2, 13, 2)
 
             # Create shots CSV (metadata)
             shots_data = {
@@ -314,7 +314,7 @@ def create_lstm_csv_structure(
 
             # Create wireframe CSV (keypoint data)
             # LSTM expects one player per shot, use player 0 (bottom player)
-            player_data = sample_joints[:, 0, :, :]  # shape: (41, 13, 2)
+            player_data = sample_joints[:, 0, :, :] # shape: (41, 13, 2)
 
             wireframe_rows = []
             for frame_idx in range(n_frames):
@@ -386,9 +386,9 @@ def main():
     print("=" * 60)
     print("BST → LSTM Dataset Conversion")
     print("=" * 60)
-    print(f"Input:  {args.bst_npy_dir}")
+    print(f"Input: {args.bst_npy_dir}")
     print(f"Output: {args.output_dir}")
-    print(f"Split:  {args.split}")
+    print(f"Split: {args.split}")
     print(f"Frames: {args.frames}")
     print("=" * 60)
 
@@ -409,10 +409,10 @@ def main():
     create_lstm_csv_structure(joints_data, labels, args.output_dir, args.split, use_38_class_mapping=args.use_all_classes)
 
     print("\n" + "=" * 60)
-    print("✅ Conversion complete!")
+    print(" Conversion complete!")
     print("=" * 60)
     print(f"\nYou can now evaluate LSTM model using:")
-    print(f"  python evaluate_lstm.py {args.output_dir}")
+    print(f" python evaluate_lstm.py {args.output_dir}")
 
 
 if __name__ == '__main__':

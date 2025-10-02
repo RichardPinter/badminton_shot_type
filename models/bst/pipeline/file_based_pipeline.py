@@ -132,7 +132,7 @@ def _stage_triplet_for_bst(
       <stem>_joints.npy, <stem>_pos.npy, <stem>_shuttle.npy
     Returns the directory containing the staged files.
     """
-    staged_dir = temp_dir / "bst_format" / "test" / "Top_殺球"
+    staged_dir = temp_dir / "bst_format" / "test" / "Top_"
     staged_dir.mkdir(parents=True, exist_ok=True)
 
     src_joints = bst_data_dir / "poses.npy"
@@ -173,8 +173,8 @@ class FileBased_Pipeline:
 
         self._verify_components()
         print("File-based Pipeline initialized")
-        print(f"  BST weights: {self.bst_weight_path}")
-        print(f"  TrackNet weights: {self.tracknet_model_path}")
+        print(f" BST weights: {self.bst_weight_path}")
+        print(f" TrackNet weights: {self.tracknet_model_path}")
 
     def _verify_components(self):
         missing = []
@@ -223,15 +223,15 @@ class FileBased_Pipeline:
         video_path: Path,
         output_dir: Path,
         progress_cb: Optional[Callable[[str, float], None]] = None,
-        target_frames: Optional[int] = SEQ_LEN,  # None = process full video
-        court_corners: Optional[List[Tuple[int, int]]] = None,  # Court boundary for filtering
+        target_frames: Optional[int] = SEQ_LEN, # None = process full video
+        court_corners: Optional[List[Tuple[int, int]]] = None, # Court boundary for filtering
     ) -> Tuple[bool, Optional[Path], Optional[Path], str]:
         try:
             from mmpose.apis import MMPoseInferencer
         except Exception as e:
             return False, None, None, f"MMPose not available: {e}"
 
-        device = os.environ.get("BST_DEVICE", "cpu")  # CPU by default
+        device = os.environ.get("BST_DEVICE", "cpu") # CPU by default
         output_dir.mkdir(parents=True, exist_ok=True)
 
         if progress_cb:
@@ -251,11 +251,11 @@ class FileBased_Pipeline:
                     key_seq.append(np.zeros((2, 17, 2), dtype=float))
                     pos_seq.append(np.zeros((2, 2), dtype=float))
                 else:
-                    persons = preds[0]  # batch=1
+                    persons = preds[0] # batch=1
 
                     # Filter people by court boundaries if provided
                     if court_corners and len(court_corners) == 4:
-                        if i == 0:  # Log once at first frame
+                        if i == 0: # Log once at first frame
                             print(f"[DEBUG] Court corners provided: {court_corners}")
                             print(f"[DEBUG] Total persons detected: {len(persons)}")
 
@@ -279,13 +279,13 @@ class FileBased_Pipeline:
 
                             # Check if reference point is inside court
                             inside = is_point_inside_court(reference_point, court_corners)
-                            if i == 0:  # Log once
+                            if i == 0: # Log once
                                 print(f"[DEBUG] Person at {reference_point}: inside={inside}")
 
                             if inside:
                                 valid_persons.append(p)
 
-                        if i == 0:  # Log once
+                        if i == 0: # Log once
                             print(f"[DEBUG] Valid persons inside court: {len(valid_persons)}")
 
                         # Use filtered persons if we found at least 2
@@ -337,8 +337,8 @@ class FileBased_Pipeline:
         if len(key_seq) == 0:
             return False, None, None, "MMPose produced no frames."
 
-        keys = np.stack(key_seq)  # (T, 2, 17, 2)
-        poss = np.stack(pos_seq)  # (T, 2, 2)
+        keys = np.stack(key_seq) # (T, 2, 17, 2)
+        poss = np.stack(pos_seq) # (T, 2, 2)
         T = keys.shape[0]
 
         # Only pad if target_frames is specified and we have fewer frames
@@ -602,7 +602,7 @@ class FileBased_Pipeline:
                 viz_success = create_combined_visualization(
                     input_video_path=video_path,
                     output_video_path=combined_viz_path,
-                    poses_npy_path=raw_joints_file,  # Use raw poses for full video
+                    poses_npy_path=raw_joints_file, # Use raw poses for full video
                     shuttlecock_csv_path=tracknet_csv,
                     court_corner_points=court_corners,
                     show_trajectory=True,
@@ -633,21 +633,21 @@ class FileBased_Pipeline:
                 bst_input_dir.mkdir(exist_ok=True)
 
                 # Load collated data (batch_size=1) and save as triplet format
-                jnb_data = np.load(jnb_bone_file)  # (1, seq_len, 2, J+B, 2)
-                pos_data = np.load(pos_file)  # (1, seq_len, 2, 2)
-                shuttle_data = np.load(shuttle_file)  # (1, seq_len, 2)
+                jnb_data = np.load(jnb_bone_file) # (1, seq_len, 2, J+B, 2)
+                pos_data = np.load(pos_file) # (1, seq_len, 2, 2)
+                shuttle_data = np.load(shuttle_file) # (1, seq_len, 2)
 
                 # Remove batch dimension for BST script
-                np.save(bst_input_dir / f"{video_path.stem}_joints.npy", jnb_data[0])  # (seq_len, 2, J+B, 2)
-                np.save(bst_input_dir / f"{video_path.stem}_pos.npy", pos_data[0])  # (seq_len, 2, 2)
-                np.save(bst_input_dir / f"{video_path.stem}_shuttle.npy", shuttle_data[0])  # (seq_len, 2)
+                np.save(bst_input_dir / f"{video_path.stem}_joints.npy", jnb_data[0]) # (seq_len, 2, J+B, 2)
+                np.save(bst_input_dir / f"{video_path.stem}_pos.npy", pos_data[0]) # (seq_len, 2, 2)
+                np.save(bst_input_dir / f"{video_path.stem}_shuttle.npy", shuttle_data[0]) # (seq_len, 2)
 
                 # Run BST inference
                 proc = subprocess.run(
                     [sys.executable, str(bst_script),
                      str(bst_input_dir / video_path.stem),
                      "--weights", str(bst_weights),
-                     "--device", "cpu"],  # Use CPU by default
+                     "--device", "cpu"], # Use CPU by default
                     capture_output=True,
                     text=True,
                     timeout=120
@@ -692,7 +692,7 @@ class FileBased_Pipeline:
                 pose_file=raw_joints_file,
                 pos_file=raw_pos_file,
                 tracknet_csv=tracknet_csv,
-                tracknet_video=None,  # process_single_video doesn't generate this
+                tracknet_video=None, # process_single_video doesn't generate this
                 combined_viz_video=combined_viz_video,
                 bst_root=bst_input_dir,
                 temp_dir=temp_dir,

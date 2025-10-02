@@ -136,7 +136,7 @@ def create_dummy_court_info(video_id: int) -> Dict:
     This provides normalized court boundaries assuming the full frame is the court.
     """
     return {
-        'H': np.eye(3),  # Identity homography (no transformation)
+        'H': np.eye(3), # Identity homography (no transformation)
         'border_L': 0.0,
         'border_R': 1.0,
         'border_U': 0.0,
@@ -163,9 +163,9 @@ def create_court_info_from_homography(H: np.ndarray, video_id: int, width: int, 
     return {
         'H': H,
         'border_L': 0.0,
-        'border_R': 6.1,   # COURT_WIDTH_M
+        'border_R': 6.1, # COURT_WIDTH_M
         'border_U': 0.0,
-        'border_D': 13.4,  # COURT_LENGTH_M
+        'border_D': 13.4, # COURT_LENGTH_M
     }
 
 
@@ -244,12 +244,12 @@ def process_single_video(
 
         # Create or load court info (priority: matrix > CSV > dummy)
         if homography_matrix is not None:
-            print("🔢 Using provided homography matrix")
+            print(" Using provided homography matrix")
             print(f"Homography matrix:\n{homography_matrix}")
             all_court_info = {video_id: create_court_info_from_homography(
                 homography_matrix, video_id, width, height
             )}
-            print(f"✅ Court boundaries: L={all_court_info[video_id]['border_L']:.2f}, "
+            print(f" Court boundaries: L={all_court_info[video_id]['border_L']:.2f}, "
                   f"R={all_court_info[video_id]['border_R']:.2f}, "
                   f"U={all_court_info[video_id]['border_U']:.2f}, "
                   f"D={all_court_info[video_id]['border_D']:.2f}\n")
@@ -279,7 +279,7 @@ def process_single_video(
         print("STEP 1: Shuttlecock trajectory detection (TrackNet)")
         print("="*60)
         prepare_trajectory(dataset_root, save_shuttle_dir)
-        print("✓ Trajectory detection complete\n")
+        print(" Trajectory detection complete\n")
 
         # STEP 2: Player pose detection (MMPose) + create raw .npy files
         print("="*60)
@@ -294,7 +294,7 @@ def process_single_video(
             joints_normalized_by_v_height=False,
             joints_center_align=joints_center_align
         )
-        print("✓ Pose estimation complete\n")
+        print(" Pose estimation complete\n")
 
         # STEP 3: Collate and augment data
         print("="*60)
@@ -314,9 +314,9 @@ def process_single_video(
             shuttle_path=shuttle_file,
             output_dir=save_root_dir_collate,
             seq_len=seq_len,
-            label=0  # Default label for unknown stroke type
+            label=0 # Default label for unknown stroke type
         )
-        print("✓ Collation complete\n")
+        print(" Collation complete\n")
 
         # Keep intermediates if requested
         if keep_intermediates:
@@ -341,13 +341,13 @@ def process_single_video(
         raise RuntimeError(f"Missing output files: {missing}")
 
     print("="*60)
-    print("✓ Processing complete!")
+    print(" Processing complete!")
     print("="*60)
     print(f"\nOutput files saved to: {save_root_dir_collate}")
     print("\nGenerated files:")
     for name, path in output_files.items():
         size_mb = path.stat().st_size / (1024 * 1024)
-        print(f"  {name:12s}: {path.name} ({size_mb:.2f} MB)")
+        print(f" {name:12s}: {path.name} ({size_mb:.2f} MB)")
     print()
 
     return output_files

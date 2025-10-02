@@ -26,10 +26,10 @@ def _fmt_prediction(result: PipelineResult, threshold: float) -> str:
 
     warn = ""
     if conf_val is not None and conf_val < threshold:
-        warn = f" ⚠️ (below {threshold:.0%} threshold)"
+        warn = f" (below {threshold:.0%} threshold)"
 
     md = [
-        "## 🏸 Stroke Classification Result",
+        "## Stroke Classification Result",
         f"**Predicted Stroke:** `{result.stroke_prediction}`{warn}",
         f"**Confidence:** {conf_str}",
         f"**Processing Time:** {result.processing_time:.2f} seconds" if result.processing_time else "",
@@ -41,8 +41,8 @@ def _fmt_prediction(result: PipelineResult, threshold: float) -> str:
         for i, pred in enumerate(result.top3_predictions, 1):
             p = float(pred["confidence"])
             bar_len = int(p * 20)
-            bar = "█" * bar_len + "░" * (20 - bar_len)
-            md.append(f"{i}. **{pred['class']}** – {p:.1%}  `{bar}`")
+            bar = "" * bar_len + "" * (20 - bar_len)
+            md.append(f"{i}. **{pred['class']}** – {p:.1%} `{bar}`")
     else:
         md.append("_No detailed predictions available_")
 
@@ -71,7 +71,7 @@ def _confidence_html(result: PipelineResult) -> str:
 
     return f"""
     <div style="font-family:Arial, sans-serif;">
-      <h3>📊 Confidence Breakdown</h3>
+      <h3> Confidence Breakdown</h3>
       <div>{"".join(rows)}</div>
     </div>
     """
@@ -83,13 +83,13 @@ def _fmt_technical(result: PipelineResult) -> str:
     vid_name = result.tracknet_video.name if result.tracknet_video else "N/A"
 
     md = f"""
-## 📈 Technical Analysis
+## Technical Analysis
 
 ### Pipeline Status
-- ✅ Video Validation
-- ✅ MMPose Pose Detection
-- ✅ TrackNetV3 Shuttlecock Tracking
-- ✅ BST_8 Inference (JnB_bone)
+- Video Validation
+- MMPose Pose Detection
+- TrackNetV3 Shuttlecock Tracking
+- BST_8 Inference (JnB_bone)
 
 ### Generated Files
 - **Pose Data:** {pose_name}
@@ -97,8 +97,8 @@ def _fmt_technical(result: PipelineResult) -> str:
 - **Prediction Video:** {vid_name}
 
 ### Model
-- **Architecture:** BST-8 (Badminton Stroke Transformer)
-- **Pose Input:** joints + bones (COCO pairs), 2D
+- **Architecture:**BST-8 (Badminton Stroke Transformer)
+- **Pose Input:**joints + bones (COCO pairs), 2D
 - **Sequence Length:** 30 frames (padded/truncated)
 - **Classes:** 35 stroke types
 """
@@ -165,7 +165,7 @@ class GradioApp:
         """Main handler for the Analyze button."""
         self._log_lines = []
         if not video_file:
-            return ("❌ No video uploaded.",
+            return (" No video uploaded.",
                     "<p>No confidence data.</p>",
                     "No technical details.",
                     None, None,
@@ -176,7 +176,7 @@ class GradioApp:
 
         if not result.success:
             log_txt = "\n".join(self._log_lines + [f"[x] Error: {result.error_message}"])
-            return (f"❌ Processing failed: {result.error_message}",
+            return (f" Processing failed: {result.error_message}",
                     "<p>No confidence data.</p>",
                     "No technical details.",
                     None, None,
@@ -191,7 +191,7 @@ class GradioApp:
         json_path = _export_raw_json(result) if export_json else None
         video_path = str(result.tracknet_video) if result.tracknet_video else None
 
-        log_txt = "\n".join(self._log_lines + ["[done] ✅ Finished."])
+        log_txt = "\n".join(self._log_lines + ["[done] Finished."])
         return (pred_md, conf_html, tech_md, json_path, video_path, log_txt)
 
     def build(self):
@@ -200,37 +200,37 @@ class GradioApp:
         .result-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 14px; }
         """
 
-        with gr.Blocks(title="🏸 Badminton Stroke Classifier", css=css) as demo:
+        with gr.Blocks(title=" Badminton Stroke Classifier", css=css) as demo:
             gr.HTML(
                 """<div style="text-align:center;padding:18px;border-radius:10px;
                 background:linear-gradient(90deg,#667eea 0%,#764ba2 100%);color:white;">
-                <h1>🏸 Badminton Stroke Classifier</h1>
-                <p>Upload a video — we’ll run MMPose ➜ TrackNetV3 ➜ BST-8 (JnB_bone) and show the prediction.</p>
+                <h1> Badminton Stroke Classifier</h1>
+                <p>Upload a video — we’ll run MMPose TrackNetV3 BST-8 (JnB_bone) and show the prediction.</p>
                 </div>"""
             )
 
             with gr.Row():
                 with gr.Column(scale=1):
-                    gr.Markdown("### 📹 Video")
+                    gr.Markdown("### Video")
                     vid = gr.Video(label="Upload stroke clip (0.5–30s)", sources=["upload"], include_audio=False)
 
-                    gr.Markdown("### ⚙️ Settings")
+                    gr.Markdown("### Settings")
                     thr = gr.Slider(0.0, 1.0, value=0.5, step=0.05, label="Confidence threshold")
                     want_json = gr.Checkbox(value=True, label="Export raw JSON summary")
 
-                    run_btn = gr.Button("🚀 Analyze Stroke", variant="primary")
+                    run_btn = gr.Button(" Analyze Stroke", variant="primary")
 
                 with gr.Column(scale=2):
-                    gr.Markdown("### 📊 Results")
+                    gr.Markdown("### Results")
                     out_pred = gr.Markdown(value="Upload a video and click **Analyze**.", elem_classes=["result-box"])
                     out_conf = gr.HTML(value="<p>Confidence bars will appear here.</p>")
                     out_tech = gr.Markdown(value="Technical details will appear here.")
 
-                    gr.Markdown("### 📁 Downloads")
+                    gr.Markdown("### Downloads")
                     out_json = gr.File(label="Raw JSON", interactive=False)
                     out_vid = gr.File(label="TrackNet predicted video", interactive=False)
 
-                    gr.Markdown("### 🧾 Logs")
+                    gr.Markdown("### Logs")
                     out_log = gr.Textbox(value="", lines=10, max_lines=20, show_copy_button=True)
 
             # Wire events (no special queue args to keep compat with older Gradio)
@@ -254,7 +254,7 @@ class GradioApp:
 # -------------
 if __name__ == "__main__":
     app = GradioApp()
-    ui = app.build().queue()  # keep simple for broad version compatibility
+    ui = app.build().queue() # keep simple for broad version compatibility
     ui.launch(
         server_name="127.0.0.1",
         server_port=7860,

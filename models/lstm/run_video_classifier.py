@@ -109,9 +109,9 @@ def extract_poses_from_video(
 
     # Debug: Check if data is actually populated
     for player_key, frames in result.items():
-        logger.info(f"  {player_key}: {len(frames)} frames")
+        logger.info(f" {player_key}: {len(frames)} frames")
         if len(frames) > 0:
-            logger.info(f"    Sample frame keys: {list(frames[0].keys())}")
+            logger.info(f" Sample frame keys: {list(frames[0].keys())}")
 
     return result
 
@@ -276,7 +276,7 @@ def predict_shot_from_csv(
     # TODO: Handle multiple shots if needed
     result = {
         'shot': predictions[0] if predictions else 'unknown',
-        'confidence': 0.0,  # TODO: Extract confidence from model
+        'confidence': 0.0, # TODO: Extract confidence from model
         'all_predictions': predictions
     }
 
@@ -406,7 +406,7 @@ def main():
 
         # Print results
         print("\n" + "=" * 60)
-        print("🏸 SHOT CLASSIFICATION RESULT")
+        print(" SHOT CLASSIFICATION RESULT")
         print("=" * 60)
         print(f"Predicted Shot Type: {result['shot'].upper()}")
         print(f"Confidence: {result['confidence']:.2%}")

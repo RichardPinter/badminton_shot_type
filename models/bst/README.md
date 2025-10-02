@@ -1,4 +1,4 @@
-# 🏸 Badminton Stroke Classification
+# Badminton Stroke Classification
 
 A comprehensive AI system for classifying badminton strokes using computer vision and deep learning. This project combines human pose estimation (MMPose), shuttlecock tracking (TrackNetV3), and stroke classification (BST - Badminton Stroke Transformer) to analyze badminton videos.
 
@@ -21,7 +21,7 @@ cd badminton-stroke-classifier
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -77,8 +77,8 @@ The system uses a multi-stage pipeline:
 
 ```
 Video Input → MMPose → TrackNetV3 → BST → Stroke Classification
-              ↓         ↓           ↓
-           Pose Data  Shuttle Data  Feature Fusion
+              ↓ ↓ ↓
+           Pose Data Shuttle Data Feature Fusion
 ```
 
 ### Components
@@ -110,19 +110,19 @@ Best performing strokes:
 - Rush shots: 80% F1
 - Service shots: 74-76% F1
 
-## 🔧 Development
+## Development
 
 ### Project Structure
 ```
 badminton-stroke-classifier/
-├── models/          # BST architectures and utilities
-├── pipeline/        # Processing pipeline
-├── tracknet/        # TrackNetV3 components
-├── ui/              # Gradio web interface
-├── weights/         # Model weights (downloaded)
-├── examples/        # Sample videos
-├── scripts/         # Utility scripts
-└── docs/           # Documentation
+ models/ # BST architectures and utilities
+ pipeline/ # Processing pipeline
+ tracknet/ # TrackNetV3 components
+ ui/ # Gradio web interface
+ weights/ # Model weights (downloaded)
+ examples/ # Sample videos
+ scripts/ # Utility scripts
+ docs/ # Documentation
 ```
 
 ### Training Your Own Model

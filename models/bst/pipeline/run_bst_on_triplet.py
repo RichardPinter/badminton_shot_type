@@ -11,9 +11,9 @@ import torch.nn.functional as F
 
 # repo-local imports
 from models.bst import BST_8
-from models.dataset import get_stroke_types, get_bone_pairs  # bone pairs used to build JnB_bone
+from models.dataset import get_stroke_types, get_bone_pairs # bone pairs used to build JnB_bone
 
-SEQ_LEN = 100  # Data sequence length (BST_8 internally uses SEQ_LEN+1=101 for embeddings)
+SEQ_LEN = 100 # Data sequence length (BST_8 internally uses SEQ_LEN+1=101 for embeddings)
 N_PLAYERS = 2
 
 # Frontier classes for bottom court (6 classes) - MUST match training order
@@ -61,14 +61,14 @@ def ensure_pose_JnB_bone(joints_np: np.ndarray) -> np.ndarray:
         return joints_np
 
     # Build bones
-    pairs = get_bone_pairs()  # default coco pairs used in training
+    pairs = get_bone_pairs() # default coco pairs used in training
     bones = []
     # bone = end - start
     for (a, b) in pairs:
         bones.append(joints_np[:, :, b, :] - joints_np[:, :, a, :])
-    bones_np = np.stack(bones, axis=2)  # (T,P,B,2)
+    bones_np = np.stack(bones, axis=2) # (T,P,B,2)
 
-    jnb = np.concatenate([joints_np, bones_np], axis=2)  # (T,P,J+B,2)
+    jnb = np.concatenate([joints_np, bones_np], axis=2) # (T,P,J+B,2)
     return jnb
 
 @torch.no_grad()
@@ -86,22 +86,22 @@ def infer_triplet(joints_np: np.ndarray,
 
     # Torch tensors (batch size = 1)
     device = torch.device(device)
-    human_pose = torch.tensor(joints_np, dtype=torch.float32, device=device)  # (T,P,J+B,2)
-    pos = torch.tensor(pos_np, dtype=torch.float32, device=device)            # (T,P,2)
-    shuttle = torch.tensor(shuttle_np, dtype=torch.float32, device=device)    # (T,2)
-    video_len = torch.tensor([SEQ_LEN], dtype=torch.int32, device=device)     # (1,)
+    human_pose = torch.tensor(joints_np, dtype=torch.float32, device=device) # (T,P,J+B,2)
+    pos = torch.tensor(pos_np, dtype=torch.float32, device=device) # (T,P,2)
+    shuttle = torch.tensor(shuttle_np, dtype=torch.float32, device=device) # (T,2)
+    video_len = torch.tensor([SEQ_LEN], dtype=torch.int32, device=device) # (1,)
 
     # Flatten pose for the model: (B,T,P,(J+B)*2)
-    human_pose = human_pose.unsqueeze(0)  # (1,T,P,J+B,2)
+    human_pose = human_pose.unsqueeze(0) # (1,T,P,J+B,2)
     B, T, P, JplusB, C = human_pose.shape
     human_pose = human_pose.view(B, T, P, JplusB * C)
 
-    pos = pos.unsqueeze(0)         # (1,T,P,2)
+    pos = pos.unsqueeze(0) # (1,T,P,2)
     shuttle = shuttle.unsqueeze(0) # (1,T,2)
 
     # Build BST_8 — in_dim=(J+B)*2
-    in_dim = JplusB * C  # expected 72 for COCO JnB_bone
-    n_classes = len(FRONTIER_CLASSES)  # Use frontier classes (6 classes)
+    in_dim = JplusB * C # expected 72 for COCO JnB_bone
+    n_classes = len(FRONTIER_CLASSES) # Use frontier classes (6 classes)
     net = BST_8(
         in_dim=in_dim,
         n_class=n_classes,
@@ -116,11 +116,11 @@ def infer_triplet(joints_np: np.ndarray,
     net.load_state_dict(state, strict=True)
     net.eval()
 
-    logits = net(human_pose, shuttle, pos, video_len)  # (1, n_classes)
-    probs = F.softmax(logits, dim=1).squeeze(0)        # (n_classes,)
+    logits = net(human_pose, shuttle, pos, video_len) # (1, n_classes)
+    probs = F.softmax(logits, dim=1).squeeze(0) # (n_classes,)
     conf, idx = torch.topk(probs, k=3)
 
-    classes = FRONTIER_CLASSES  # Use frontier classes
+    classes = FRONTIER_CLASSES # Use frontier classes
     top3 = [(classes[i], float(conf[j].item())) for j, i in enumerate(idx.tolist())]
     pred_idx = int(torch.argmax(probs).item())
     pred_class = classes[pred_idx]
@@ -160,13 +160,13 @@ def main():
         device=args.device
     )
 
-    print("\n🎯 Prediction")
+    print("\n Prediction")
     print(f"Class: {pred_class}")
     print(f"Confidence: {pred_conf:.3f}")
     print("\nTop-3:")
     for i, (c, s) in enumerate(top3, 1):
-        bar = "█" * int(s * 20)
-        print(f"{i}. {c:>12s}  {s:6.2%}  {bar}")
+        bar = "" * int(s * 20)
+        print(f"{i}. {c:>12s} {s:6.2%} {bar}")
 
 if __name__ == "__main__":
     main()

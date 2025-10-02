@@ -64,7 +64,7 @@ def set_one_ax_confusion_matrix(
     ax.set_xticks(classes, classes, fontsize=font_size)
     ax.set_yticks(classes, classes, fontsize=font_size)
     
-    if len(matrix) < 18:  # 類別少的話可以顯示個別的數值了
+    if len(matrix) < 18: #
         fmt = '.2f' if normalized else 'd'
         thresh = matrix.max() / 2.
         for i in range(matrix.shape[0]):
@@ -76,7 +76,7 @@ def set_one_ax_confusion_matrix(
                     color="white" if matrix[i, j] > thresh else "black",
                     fontsize=font_size
                 )
-    else:  # draw grids
+    else: # draw grids
         for i in classes[:-1]:
             mid_point = (classes[i] + classes[i + 1]) / 2
             ax.axvline(x=mid_point, color='black', linestyle='-')
