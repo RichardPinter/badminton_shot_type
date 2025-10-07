@@ -1,0 +1,51 @@
+# ================================================================================
+# LSTM SHOT CLASSIFIER - DEPENDENCY SPECIFICATIONS
+# ================================================================================
+#
+# Standalone dependencies for LSTM-based badminton shot classification
+#
+# INSTALLATION:
+# pip install -r requirements.txt
+#
+# ================================================================================
+
+# ================================================================================
+# DEEP LEARNING & SHOT CLASSIFICATION
+# ================================================================================
+
+# TensorFlow: LSTM model inference
+tensorflow>=2.12.0
+
+# ================================================================================
+# COMPUTER VISION & POSE ESTIMATION
+# ================================================================================
+
+# Ultralytics: YOLOv11-pose for player pose estimation
+ultralytics>=8.0.35
+
+# PyTorch: Backend for YOLO model
+torch==2.2.0
+torchvision==0.17.0
+
+# OpenCV: Video processing and frame extraction
+opencv-python>=4.11.0.86
+
+# ================================================================================
+# DATA PROCESSING
+# ================================================================================
+
+# NumPy: Array operations and numerical computing
+numpy>=1.20.0
+
+# Pandas: CSV handling and data manipulation
+pandas>=1.3.5
+
+# Joblib: Model serialization (if needed)
+joblib>=1.0.0
+
+# ================================================================================
+# SYSTEM UTILITIES
+# ================================================================================
+
+# Pillow: Image processing (dependency for OpenCV)
+Pillow>=8.4.0
