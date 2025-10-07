@@ -539,35 +539,6 @@ with gr.Blocks(title="Badminton Stroke Classifiers", theme=gr.themes.Soft()) as 
 
     gr.Markdown("---")
 
-    # Demo videos section
-    gr.Markdown("### Try Demo Videos (Bottom Player)")
-    gr.Markdown("**Note:**Demo videos are pre-calibrated and don't require court corner selection.")
-
-    demo_base_path = "demo_videos"
-    demo_videos = {
-        " Clear": f"{demo_base_path}/34_1_1_7.mp4",
-        " Drive": f"{demo_base_path}/36_1_20_16.mp4",
-        " Drop": f"{demo_base_path}/34_1_26_10.mp4",
-        " Lob": f"{demo_base_path}/32_2_13_7.mp4",
-        " Net": f"{demo_base_path}/33_2_19_4.mp4",
-        " Smash": f"{demo_base_path}/35_2_33_11.mp4",
-    }
-
-    def load_demo_video(demo_path):
-        """Load demo video and set dummy homography (demo videos are pre-calibrated)."""
-        # Demo videos don't need calibration - use identity homography as marker
-        demo_homography = np.eye(3)
-        return demo_path, demo_homography, "**Status:** Demo video loaded (pre-calibrated)"
-
-    with gr.Row():
-        for label, path in demo_videos.items():
-            gr.Button(label, size="sm").click(
-                lambda p=path: load_demo_video(p),
-                outputs=[video_input, homography_state, calibration_status]
-            )
-
-    gr.Markdown("---")
-
     # Side-by-side classifiers
     with gr.Row(equal_height=True):
         # ====================================================================
